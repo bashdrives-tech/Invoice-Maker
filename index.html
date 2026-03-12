@@ -2,147 +2,225 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>City Track Tours & Travels - Invoice Maker</title>
-
-<!-- PDF Library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<title>Taxi Ride Invoice</title>
 
 <style>
-body{font-family:Arial;background:#f4f4f4;margin:0;padding:15px}
-.container{max-width:900px;margin:auto;background:#fff;padding:20px;border-radius:10px}
-h1{text-align:center;color:red}
-input,select{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc;border-radius:5px}
-button{background:red;color:#fff;border:none;padding:12px;width:100%;margin-top:8px;font-size:16px}
-.invoice{margin-top:20px;border:1px solid #ccc;padding:15px}
-table{width:100%;border-collapse:collapse}
-td,th{border:1px solid #ccc;padding:8px}
-.total{font-size:20px;color:red;text-align:right;font-weight:bold}
-.history{margin-top:20px;background:#fafafa;padding:10px}
+
+body{
+font-family: Arial, sans-serif;
+background:#f3f3f3;
+padding:20px;
+}
+
+.invoice{
+background:white;
+max-width:900px;
+margin:auto;
+padding:30px;
+box-shadow:0 0 10px #ccc;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.logo img{
+height:70px;
+}
+
+.total{
+font-size:40px;
+font-weight:bold;
+}
+
+.section{
+margin-top:25px;
+}
+
+.mapbox{
+border:1px solid #ccc;
+height:200px;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+}
+
+.mapbox img{
+width:100%;
+}
+
+.details{
+display:flex;
+justify-content:space-between;
+}
+
+.table{
+width:100%;
+border-collapse:collapse;
+}
+
+.table td{
+padding:8px;
+border-bottom:1px solid #ddd;
+}
+
+.timeline{
+margin-top:15px;
+}
+
+.timeline div{
+margin-bottom:6px;
+}
+
+input{
+border:none;
+border-bottom:1px solid #999;
+font-size:14px;
+}
+
+@media print{
+body{background:white;}
+input{border:none;}
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="container">
-<h1>City Track Tours & Travels</h1>
-<p align="center">
-Neelambur, Coimbatore<br>
-📞 9042080150 | citytrack.cbe@gmail.com<br>
-www.taxiincoimbatore.in
+<div class="invoice">
+
+<div class="header">
+
+<div>
+<h2>GET TAXI KOVAI</h2>
+<div>Taxi and Travel Partner</div>
+<div>Date: <input type="date"></div>
+</div>
+
+<div class="total">
+₹ <input style="width:100px" placeholder="Total">
+</div>
+
+<div class="logo">
+<input type="file" onchange="loadLogo(event)">
+<img id="logoPreview">
+</div>
+
+</div>
+
+<div class="section details">
+
+<div style="width:48%">
+
+<div class="mapbox">
+<input type="file" onchange="loadMap(event)">
+<img id="mapPreview">
+</div>
+
+<p>You rode with <input placeholder="Driver Name"></p>
+
+<p>Distance: <input style="width:60px" placeholder="KM"> km</p>
+
+<p>Vehicle: <input placeholder="Sedan / SUV"></p>
+
+<p>Cab Number: <input placeholder="TN00 XX 0000"></p>
+
+</div>
+
+<div style="width:48%">
+
+<table class="table">
+
+<tr>
+<td>Your Trip</td>
+<td>₹ <input placeholder="3000"></td>
+</tr>
+
+<tr>
+<td>Toll Fee</td>
+<td>₹ <input placeholder="0"></td>
+</tr>
+
+<tr>
+<td>Parking</td>
+<td>₹ <input placeholder="0"></td>
+</tr>
+
+<tr>
+<td>Airport Charges</td>
+<td>₹ <input placeholder="0"></td>
+</tr>
+
+<tr>
+<td><b>Total Bill</b></td>
+<td><b>₹ <input placeholder="Total"></b></td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<div class="section timeline">
+
+<h3>Trip Timeline</h3>
+
+<div>
+<input placeholder="10:00 AM">
+<input style="width:70%" placeholder="Pickup Location">
+</div>
+
+<div>
+<input placeholder="05:00 PM">
+<input style="width:70%" placeholder="Drop Location">
+</div>
+
+</div>
+
+<div class="section">
+
+<h3>Payment</h3>
+
+Paid by <input placeholder="UPI / Cash / Card">
+₹ <input placeholder="Amount">
+
+</div>
+
+<div class="section">
+
+<p style="font-size:12px">
+In case of any complaint/grievance against this invoice write to:<br>
+GET TAXI KOVAI<br>
+No 286, D.B Road, RS Puram, Coimbatore – 641002
 </p>
 
-<h3>Trip Details</h3>
-<input id="pickup" placeholder="Pickup Location">
-<input id="drop" placeholder="Drop Location">
-<input id="date" type="date">
-<select id="car">
-<option>Sedan</option>
-<option>SUV</option>
-<option>Innova</option>
-<option>Tempo Traveller</option>
-</select>
-
-<input id="km" type="number" placeholder="Total KM">
-<input id="rate" type="number" placeholder="Rate per KM">
-
-<h3>Extra Charges</h3>
-<input id="driver" type="number" placeholder="Driver Bata">
-<input id="airport" type="number" placeholder="Airport Toll">
-<input id="toll" type="number" placeholder="Toll Charges">
-<input id="interstate" type="number" placeholder="Interstate Tax">
-<input id="parking" type="number" placeholder="Parking Charges">
-
-<label><input type="checkbox" id="gstCheck"> Add GST (5%)</label>
-
-<button onclick="createInvoice()">Create Invoice</button>
-<button onclick="downloadPDF()">Download PDF</button>
-<button onclick="shareWhatsApp()">Share WhatsApp</button>
-
-<div id="invoiceArea" class="invoice"></div>
-
-<div class="history">
-<h3>Saved Invoice History</h3>
-<div id="historyList"></div>
 </div>
 
 </div>
 
 <script>
-let invoiceText="";
 
-function v(id){return Number(document.getElementById(id).value)||0;}
-
-function createInvoice(){
-
-let invoiceNo="INV-"+Date.now();
-
-let km=v("km"), rate=v("rate");
-let kmTotal=km*rate;
-
-let extras=v("driver")+v("airport")+v("toll")+v("interstate")+v("parking");
-let subtotal=kmTotal+extras;
-
-let gst=document.getElementById("gstCheck").checked ? subtotal*0.05:0;
-let grand=subtotal+gst;
-
-invoiceText=`
-Invoice No: ${invoiceNo}
-Pickup: ${pickup.value}
-Drop: ${drop.value}
-Vehicle: ${car.value}
-Total: ₹${grand.toFixed(2)}
-`;
-
-document.getElementById("invoiceArea").innerHTML=`
-<h2>Taxi Invoice</h2>
-<p><b>Invoice:</b> ${invoiceNo}</p>
-<p>${pickup.value} → ${drop.value}</p>
-
-<table>
-<tr><th>Description</th><th>Amount ₹</th></tr>
-<tr><td>KM Charge</td><td>${kmTotal.toFixed(2)}</td></tr>
-<tr><td>Driver Bata</td><td>${v("driver").toFixed(2)}</td></tr>
-<tr><td>Airport Toll</td><td>${v("airport").toFixed(2)}</td></tr>
-<tr><td>Toll Charges</td><td>${v("toll").toFixed(2)}</td></tr>
-<tr><td>Interstate Tax</td><td>${v("interstate").toFixed(2)}</td></tr>
-<tr><td>Parking</td><td>${v("parking").toFixed(2)}</td></tr>
-<tr><td>GST</td><td>${gst.toFixed(2)}</td></tr>
-</table>
-
-<p class="total">Grand Total ₹ ${grand.toFixed(2)}</p>
-<p align="center">Thank you for choosing City Track Tours & Travels 🚖</p>
-`;
-
-saveHistory(invoiceNo,grand);
+function loadLogo(event){
+var reader=new FileReader();
+reader.onload=function(){
+document.getElementById('logoPreview').src=reader.result;
+}
+reader.readAsDataURL(event.target.files[0]);
 }
 
-function downloadPDF(){
-const { jsPDF } = window.jspdf;
-let doc=new jsPDF();
-doc.text(document.getElementById("invoiceArea").innerText,10,10);
-doc.save("Taxi-Invoice.pdf");
+function loadMap(event){
+var reader=new FileReader();
+reader.onload=function(){
+document.getElementById('mapPreview').src=reader.result;
+}
+reader.readAsDataURL(event.target.files[0]);
 }
 
-function shareWhatsApp(){
-let url="https://wa.me/?text="+encodeURIComponent(invoiceText);
-window.open(url);
-}
-
-function saveHistory(no,total){
-let history=JSON.parse(localStorage.getItem("invoiceHistory"))||[];
-history.unshift({no,total});
-localStorage.setItem("invoiceHistory",JSON.stringify(history));
-loadHistory();
-}
-
-function loadHistory(){
-let history=JSON.parse(localStorage.getItem("invoiceHistory"))||[];
-document.getElementById("historyList").innerHTML=
-history.map(h=>`<div>${h.no} — ₹${h.total}</div>`).join("");
-}
-
-loadHistory();
 </script>
 
 </body>
