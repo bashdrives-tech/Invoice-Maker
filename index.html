@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Taxi Invoice Maker</title>
+    <title>Get Taxi Kovai Professional Invoice</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
-            --primary-blue: #1e63b6;
-            --text-dark: #333;
-            --text-gray: #666;
-            --border-light: #eee;
+            --brand-blue: #1e63b6;
+            --text-main: #333;
+            --text-light: #777;
         }
 
         body {
-            background: #f0f2f5;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f4f7f6;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -33,275 +32,211 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
         }
 
-        .controls input, .controls select {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        .controls input, .controls select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        
+        .btn-download {
+            background: #000; color: white; border: none; padding: 12px 30px;
+            font-size: 16px; border-radius: 4px; cursor: pointer; margin-bottom: 20px;
         }
 
         /* Invoice Container */
-        #invoice-container {
-            width: 210mm;
-        }
+        #invoice-container { width: 210mm; }
 
         .page {
             width: 210mm;
-            height: 297mm;
+            min-height: 297mm;
             background: white;
             padding: 15mm;
             margin-bottom: 20px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
             box-sizing: border-box;
             position: relative;
-            overflow: hidden;
+            color: var(--text-main);
         }
 
-        /* PAGE 1: TRIP SUMMARY STYLING */
-        .summary-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
-        .total-hero { text-align: center; margin: 20px 0; }
-        .total-hero h1 { font-size: 42px; margin: 0; color: var(--text-dark); }
-        .total-hero p { color: var(--text-gray); margin-top: 5px; }
+        /* Page 1 Specific Styling */
+        .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .date-label { font-size: 12px; color: var(--text-light); }
+        .logo-box img { height: 65px; width: auto; }
 
-        .trip-details-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; margin-top: 30px; }
-        
-        .map-placeholder { width: 100%; height: 200px; background: #f9f9f9; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .map-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+        .price-hero { text-align: center; margin: 30px 0; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .price-hero h1 { font-size: 48px; margin: 0; font-weight: 500; }
+        .price-hero p { font-size: 14px; color: var(--text-light); margin-top: 10px; }
 
-        .bill-details table { width: 100%; border-collapse: collapse; }
-        .bill-details td { padding: 10px 0; color: var(--text-gray); }
-        .bill-details .amt { text-align: right; color: var(--text-dark); font-weight: 500; }
-        .total-row { border-top: 1px solid #eee; font-weight: bold; font-size: 18px; }
+        .columns { display: flex; gap: 40px; margin-top: 20px; }
+        .col-left { flex: 1; }
+        .col-right { flex: 1.2; }
 
-        .timeline { margin-top: 30px; padding: 20px; background: #fafafa; border-radius: 8px; }
-        .timeline-item { display: flex; gap: 15px; margin-bottom: 15px; }
-        .time { font-weight: bold; width: 60px; }
-        
-        /* PAGE 2: TAX INVOICE STYLING */
-        .tax-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-        .tax-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .tax-table th { border-bottom: 1px solid #000; text-align: left; padding: 10px; font-size: 14px; }
-        .tax-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .section-title { font-size: 14px; font-weight: bold; color: var(--text-light); border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; text-align: center; }
 
-        .footer-note { font-size: 11px; color: #777; margin-top: 40px; line-height: 1.5; }
+        /* Map Resized as requested */
+        .map-wrapper { width: 100%; max-width: 240px; height: 160px; margin: 0 auto 15px; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; }
+        .map-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
-        .btn-download {
-            background: #28a745; color: white; border: none; padding: 15px 30px;
-            font-size: 18px; border-radius: 50px; cursor: pointer; margin-bottom: 40px;
-        }
+        .driver-info { text-align: center; font-size: 14px; margin-bottom: 20px; }
+        .stat-bar { display: flex; justify-content: center; align-items: center; gap: 10px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; padding: 10px 0; }
 
-        @media print {
-            .controls, .btn-download { display: none; }
-            body { background: white; padding: 0; }
-            .page { margin: 0; box-shadow: none; page-break-after: always; }
-        }
+        .bill-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .bill-table td { padding: 12px 0; color: var(--text-light); }
+        .bill-table .val { text-align: right; color: var(--text-main); font-weight: 500; }
+        .grand-total { border-top: 1.5px solid #000; font-weight: bold; font-size: 18px; }
+        .grand-total td { color: var(--text-main); }
+
+        .timeline-section { border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; }
+        .timeline-row { display: flex; align-items: center; margin-bottom: 15px; font-size: 13px; }
+        .time-box { width: 60px; font-weight: bold; }
+        .dot { color: green; margin-right: 15px; font-size: 20px; }
+
+        .payment-status { text-align: center; background: #fdfdfd; padding: 20px; border: 1px solid #eee; margin-top: 30px; font-size: 18px; }
+
+        .complaint-footer { text-align: center; font-size: 11px; color: var(--text-light); margin-top: 40px; }
+
+        @media print { .controls, .btn-download { display: none; } body { padding: 0; } .page { margin: 0; box-shadow: none; } }
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <input type="text" id="in_custName" placeholder="Customer Name" oninput="update()">
+        <input type="text" id="in_cust" placeholder="Customer Name" oninput="update()">
         <input type="text" id="in_driver" placeholder="Driver Name" oninput="update()">
-        <input type="text" id="in_vehicle" placeholder="Vehicle No (e.g. TN99 AF 5313)" oninput="update()">
-        <input type="datetime-local" id="in_pickupTime" oninput="update()">
-        <input type="text" id="in_pickupLoc" placeholder="Pickup Location" oninput="update()">
-        <input type="datetime-local" id="in_dropTime" oninput="update()">
-        <input type="text" id="in_dropLoc" placeholder="Drop Location" oninput="update()">
+        <input type="text" id="in_vehicle" placeholder="Vehicle (Sedan)" oninput="update()">
         <input type="number" id="in_fare" placeholder="Ride Fare" oninput="update()">
-        <input type="number" id="in_toll" placeholder="Toll/Convenience" oninput="update()">
-        <input type="number" id="in_km" placeholder="Total KM" oninput="update()">
-        <input type="file" accept="image/*" onchange="loadMap(event)">
-        <small>Upload Route Map Image</small>
+        <input type="number" id="in_toll" placeholder="Toll Fee" oninput="update()">
+        <input type="number" id="in_km" placeholder="KM" oninput="update()">
+        <input type="text" id="in_pLoc" placeholder="Pickup Location" oninput="update()">
+        <input type="text" id="in_dLoc" placeholder="Drop Location" oninput="update()">
+        <input type="file" onchange="loadMap(event)">
     </div>
 
-    <button class="btn-download" onclick="downloadPDF()">Download Professional PDF</button>
+    <button class="btn-download" onclick="downloadPDF()">Download 2-Page Invoice</button>
 
     <div id="invoice-container">
-        
         <div class="page" id="page1">
-            <div class="summary-header">
-                <div>
-                    <h2 style="margin:0; color:#1e63b6;">GET TAXI KOVAI</h2>
-                    <p style="margin:0; font-size:12px; color:#666;">Coimbatore Local Service</p>
+            <div class="header-top">
+                <div class="date-label" id="out_date1">11 Feb 2026</div>
+                <div class="logo-box">
+                    <img src="logo.png" alt="Get Taxi Kovai">
                 </div>
-                <img src="https://via.placeholder.com/60x60?text=LOGO" alt="Logo" id="logo1">
             </div>
 
-            <div class="total-hero">
+            <div class="price-hero">
                 <h1>₹ <span class="out_total">0</span></h1>
-                <p>Thanks for travelling with us, <span id="out_custName1">Customer</span></p>
+                <p>Thanks for travelling with us, <span id="out_cust1">Customer</span></p>
             </div>
 
-            <div class="trip-details-grid">
-                <div>
-                    <div class="map-placeholder">
-                        <img id="mapPreview" src="https://via.placeholder.com/400x200?text=Route+Map+Preview">
+            <div class="columns">
+                <div class="col-left">
+                    <div class="section-title">Ride Details</div>
+                    <div class="map-wrapper">
+                        <img id="mapPreview" src="https://via.placeholder.com/240x160?text=Map+Route">
                     </div>
-                    <p style="font-size:14px; margin-top:10px;">You rode with <strong id="out_driver1">Driver Name</strong></p>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span style="font-size:24px;">🚗</span>
+                    <div class="driver-info">You rode with <span id="out_driver1">Driver</span></div>
+                    <div class="stat-bar">
+                        <img src="https://cdn-icons-png.flaticon.com/512/812/812850.png" width="30">
                         <div>
-                            <div style="font-weight:bold" id="out_vehicle1">Sedan</div>
-                            <div style="font-size:12px; color:#666;"><span id="out_km1">0</span> Km</div>
+                            <div style="font-weight:bold" id="out_km1">67 Km</div>
+                        </div>
+                        <div style="margin-left:15px; border-left:1px solid #eee; padding-left:15px;">
+                            <img src="https://cdn-icons-png.flaticon.com/512/3202/3202926.png" width="30">
+                            <span style="font-weight:bold" id="out_vehicle1">Sedan</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-section">
+                        <div class="timeline-row">
+                            <div class="time-box">10:00</div>
+                            <span class="dot" style="color:green;">•</span>
+                            <span id="out_pLoc1">Hotel Residency Towers</span>
+                        </div>
+                        <div class="timeline-row">
+                            <div class="time-box">17:00</div>
+                            <span class="dot" style="color:orange;">•</span>
+                            <span id="out_dLoc1">Airport</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="bill-details">
-                    <h3 style="border-bottom:1px solid #eee; padding-bottom:10px;">Bill Details</h3>
-                    <table>
-                        <tr><td>Your Trip</td><td class="amt">₹ <span id="out_fare1">0.00</span></td></tr>
-                        <tr><td>Toll & Convenience</td><td class="amt">₹ <span id="out_toll1">0.00</span></td></tr>
-                        <tr><td>Tax (0%)</td><td class="amt">₹ 0.00</td></tr>
-                        <tr class="total-row">
-                            <td>Total Bill</td>
-                            <td class="amt">₹ <span class="out_total">0</span></td>
+                <div class="col-right">
+                    <div class="section-title">Bill Details</div>
+                    <table class="bill-table">
+                        <tr><td>Your Trip</td><td class="val">₹ <span id="out_fare1">0.00</span></td></tr>
+                        <tr><td>Toll Convenience fee</td><td class="val">₹ <span id="out_toll1">0.00</span></td></tr>
+                        <tr><td>Airport Charges</td><td class="val">₹ 0.00</td></tr>
+                        <tr class="grand-total">
+                            <td>Total Bill * (rounded)</td>
+                            <td class="val">₹ <span class="out_total">0</span></td>
                         </tr>
                     </table>
-                    <p style="font-size:12px; color:#888; margin-top:15px;">Paid by UPI • ₹ <span class="out_total">0</span></p>
+                    <p style="font-size:11px; color:#999; line-height:1.4; margin-top:15px;">
+                        Includes 0.00 Taxes<br><br>
+                        We've fulfilled our promise to take you to destination for pre-agreed Total Fare.
+                    </p>
                 </div>
             </div>
 
-            <div class="timeline">
-                <div class="timeline-item">
-                    <div class="time" id="out_pickupTime1">00:00</div>
-                    <div><strong id="out_pickupLoc1">Pickup Location</strong></div>
-                </div>
-                <div class="timeline-item" style="margin-bottom:0;">
-                    <div class="time" id="out_dropTime1">00:00</div>
-                    <div><strong id="out_dropLoc1">Drop Location</strong></div>
-                </div>
+            <div class="payment-status">
+                Paid by UPI ₹ <span class="out_total">0</span>
             </div>
 
-            <div style="position:absolute; bottom:20mm; width:85%; font-size:11px; color:#888; text-align:center;">
-                In case of any complaint/grievance, write to us at Reliable Rides No 286, D.B.Road, RS Puram, Coimbatore - 641002
+            <div class="complaint-footer">
+                In case of any complaint/grievance against this invoice, write to us at<br>
+                <strong>Reliable Rides No 286, D.B.Road, RS Puram, Coimbatore - 641002</strong>
             </div>
         </div>
 
-        <div class="page" id="page2">
-            <p style="text-align:center; font-size:12px; margin-bottom:5px;">Original Tax Invoice</p>
-            <div class="tax-header">
-                <h1 style="margin:0;">Driver Trip Invoice</h1>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:20px;">
-                <div>
-                    <strong id="out_driver2">Driver Name</strong><br>
-                    <span id="out_vehicle2">Vehicle No</span>
-                </div>
-                <div style="text-align:right;">
-                    Service Tax Category: <strong>Renting of Cab</strong>
-                </div>
-            </div>
-
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; border:1px solid #eee; padding:15px; font-size:13px;">
-                <div>
-                    Invoice ID: <strong>GTK-1001</strong><br>
-                    Customer Name: <strong id="out_custName2">Customer</strong>
-                </div>
-                <div style="text-align:right;">
-                    Invoice Date: <strong id="out_date2">--</strong><br>
-                    Pickup: <span id="out_pickupLoc2">Location</span>
-                </div>
-            </div>
-
-            <table class="tax-table">
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th style="text-align:right;">Amount (₹)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>Ride Fee</td><td style="text-align:right;" id="out_fare2">0.00</td></tr>
-                    <tr><td>Toll & Convenience Fee</td><td style="text-align:right;" id="out_toll2">0.00</td></tr>
-                    <tr><td>CGST (0%)</td><td style="text-align:right;">0.00</td></tr>
-                    <tr><td>SGST (0%)</td><td style="text-align:right;">0.00</td></tr>
-                    <tr style="font-weight:bold; font-size:16px;">
-                        <td>Total Customer Ride Fare</td>
-                        <td style="text-align:right;">₹ <span class="out_total">0</span></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="footer-note">
-                Please note: 1. This invoice is issued on behalf of Transport Service Provider. 2. This is an electronically generated invoice and does not require a digital signature.
-            </div>
+        <div class="page" id="page2" style="padding: 20mm;">
+             <p style="text-align:center; font-size:12px;">Original Tax Invoice</p>
+             <h1 style="border-bottom:2px solid #000;">Driver Trip Invoice</h1>
+             <p><strong id="out_driver2">Driver</strong> | <span id="out_vehicle2">Sedan</span></p>
+             <hr>
+             <table style="width:100%; border-collapse:collapse; margin-top:20px;">
+                <tr><td style="padding:10px; border-bottom:1px solid #eee;">Ride Fee</td><td style="text-align:right;" id="out_fare2">0.00</td></tr>
+                <tr><td style="padding:10px; border-bottom:1px solid #eee;">Toll Fee</td><td style="text-align:right;" id="out_toll2">0.00</td></tr>
+                <tr style="font-weight:bold; font-size:20px;"><td style="padding:10px;">Total</td><td style="text-align:right;">₹ <span class="out_total">0</span></td></tr>
+             </table>
         </div>
     </div>
 
     <script>
         function update() {
-            // Get inputs
-            const name = document.getElementById('in_custName').value;
-            const driver = document.getElementById('in_driver').value;
-            const vehicle = document.getElementById('in_vehicle').value;
             const fare = parseFloat(document.getElementById('in_fare').value) || 0;
             const toll = parseFloat(document.getElementById('in_toll').value) || 0;
-            const km = document.getElementById('in_km').value;
-            const pLoc = document.getElementById('in_pickupLoc').value;
-            const dLoc = document.getElementById('in_dropLoc').value;
-            const pTime = document.getElementById('in_pickupTime').value;
-            const dTime = document.getElementById('in_dropTime').value;
+            const total = (fare + toll).toFixed(0);
 
-            // Calculations
-            const total = (fare + toll).toFixed(2);
-
-            // Update Page 1
-            document.getElementById('out_custName1').innerText = name;
-            document.getElementById('out_driver1').innerText = driver;
-            document.getElementById('out_vehicle1').innerText = vehicle;
+            document.getElementById('out_cust1').innerText = document.getElementById('in_cust').value;
+            document.getElementById('out_driver1').innerText = document.getElementById('in_driver').value;
+            document.getElementById('out_driver2').innerText = document.getElementById('in_driver').value;
+            document.getElementById('out_vehicle1').innerText = document.getElementById('in_vehicle').value;
+            document.getElementById('out_vehicle2').innerText = document.getElementById('in_vehicle').value;
+            document.getElementById('out_km1').innerText = document.getElementById('in_km').value + " Km";
             document.getElementById('out_fare1').innerText = fare.toFixed(2);
-            document.getElementById('out_toll1').innerText = toll.toFixed(2);
-            document.getElementById('out_km1').innerText = km;
-            document.getElementById('out_pickupLoc1').innerText = pLoc;
-            document.getElementById('out_dropLoc1').innerText = dLoc;
-            
-            // Format Times
-            if(pTime) document.getElementById('out_pickupTime1').innerText = pTime.split('T')[1];
-            if(dTime) document.getElementById('out_dropTime1').innerText = dTime.split('T')[1];
-
-            // Update Page 2
-            document.getElementById('out_custName2').innerText = name;
-            document.getElementById('out_driver2').innerText = driver;
-            document.getElementById('out_vehicle2').innerText = vehicle;
             document.getElementById('out_fare2').innerText = fare.toFixed(2);
+            document.getElementById('out_toll1').innerText = toll.toFixed(2);
             document.getElementById('out_toll2').innerText = toll.toFixed(2);
-            document.getElementById('out_pickupLoc2').innerText = pLoc;
-            document.getElementById('out_date2').innerText = new Date().toLocaleDateString();
-
-            // Update all Total spans
+            document.getElementById('out_pLoc1').innerText = document.getElementById('in_pLoc').value;
+            document.getElementById('out_dLoc1').innerText = document.getElementById('in_dLoc').value;
+            
             document.querySelectorAll('.out_total').forEach(el => el.innerText = total);
+            document.getElementById('out_date1').innerText = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
         }
 
         function loadMap(e) {
             const file = e.target.files[0];
-            if (file) {
-                document.getElementById('mapPreview').src = URL.createObjectURL(file);
-            }
+            if (file) { document.getElementById('mapPreview').src = URL.createObjectURL(file); }
         }
 
         async function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
-            
-            const p1 = document.getElementById("page1");
-            const p2 = document.getElementById("page2");
-
-            // Page 1
-            const canvas1 = await html2canvas(p1, { scale: 2 });
+            const canvas1 = await html2canvas(document.getElementById("page1"), { scale: 2 });
             pdf.addImage(canvas1.toDataURL("image/png"), 'PNG', 0, 0, 210, 297);
-            
             pdf.addPage();
-            
-            // Page 2
-            const canvas2 = await html2canvas(p2, { scale: 2 });
+            const canvas2 = await html2canvas(document.getElementById("page2"), { scale: 2 });
             pdf.addImage(canvas2.toDataURL("image/png"), 'PNG', 0, 0, 210, 297);
-
-            pdf.save("Taxi_Invoice_Professional.pdf");
+            pdf.save("GetTaxiKovai_Professional.pdf");
         }
     </script>
 </body>
