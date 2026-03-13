@@ -9,38 +9,33 @@
     <style>
         :root { 
             --primary: #1e63b6; 
-            --accent: #ffcc00; /* Vibrant Yellow for highlights */
+            --soft-blue: #e3f2fd; /* New soft blue for print-friendly bar */
             --gray: #666; 
             --dark: #222;
         }
         body { background: #eef2f7; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         
-        /* Control Panel */
         .controls { width: 210mm; background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         .controls input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
         .controls h3 { grid-column: span 4; margin: 5px 0; font-size: 16px; color: var(--primary); border-bottom: 1px solid #eee; }
         
         .btn-download { background: var(--primary); color: white; border: none; padding: 12px 40px; font-size: 16px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; font-weight: bold; }
 
-        /* Invoice Container */
         #invoice-container { width: 210mm; }
         .page { width: 210mm; height: 297mm; background: white; padding: 18mm; margin-bottom: 20px; box-sizing: border-box; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); overflow: hidden; }
 
-        /* Header & Logo */
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 3px solid var(--accent); padding-bottom: 15px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 3px solid var(--primary); padding-bottom: 15px; }
         .brand-box { display: flex; align-items: center; gap: 15px; }
-        .logo-circle { width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 24px; border: 3px solid var(--accent); }
+        .logo-img { height: 70px; width: auto; object-fit: contain; }
         .brand-name { font-size: 28px; font-weight: 800; color: var(--primary); margin: 0; line-height: 1; }
         .slogan { font-size: 12px; color: var(--gray); font-style: italic; margin-top: 4px; }
 
         .hero-price { text-align: center; margin: 25px 0; border-bottom: 1px solid #eee; padding-bottom: 20px; }
         .hero-price h1 { font-size: 50px; margin: 0; font-weight: 500; color: var(--dark); }
 
-        /* Layout Grid */
         .main-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; }
         .section-label { font-size: 12px; font-weight: bold; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; text-align: center; background: #f0f7ff; }
 
-        /* Map & KM Stats */
         .map-box { width: 100%; max-width: 180px; height: 120px; margin: 0 auto 10px; border: 1px solid #ddd; overflow: hidden; border-radius: 4px; }
         .map-box img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -50,21 +45,21 @@
 
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
 
-        /* Table Style */
         .bill-table { width: 100%; border-collapse: collapse; font-size: 14px; }
         .bill-table td { padding: 10px 0; color: var(--gray); }
         .bill-table td.amt { text-align: right; color: #000; font-weight: 500; }
         .grand-total { border-top: 2.5px solid var(--primary); font-weight: bold; font-size: 20px; color: var(--primary) !important; }
 
-        /* Timeline */
         .timeline { margin-top: 15px; font-size: 13px; }
-        .timeline-row { display: flex; align-items: center; margin-bottom: 8px; }
-        .time-tag { width: 50px; font-weight: bold; color: var(--primary); }
-        .dot { height: 8px; width: 8px; border-radius: 50%; margin: 0 10px; }
+        .timeline-row { display: flex; flex-direction: column; margin-bottom: 12px; padding-left: 10px; border-left: 2px solid #eee; }
+        .time-header { display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--primary); font-size: 12px; }
+        .loc-text { padding-top: 4px; color: var(--dark); }
 
-        /* Colorful Footer */
-        .footer { position: absolute; bottom: 10mm; left: 0; right: 0; text-align: center; font-size: 11px; padding: 15px; background: var(--primary); color: white; }
-        .footer a { color: var(--accent); text-decoration: none; font-weight: bold; }
+        .footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; padding: 15px; background: var(--primary); color: white; }
+        .footer a { color: #fff; text-decoration: none; font-weight: bold; }
+
+        /* Payment Status - Updated to soft blue */
+        .payment-status { text-align: center; margin-top: 35px; padding: 15px; background: var(--soft-blue); color: var(--primary); font-size: 18px; font-weight: bold; border-radius: 8px; border: 1px solid #bbdefb; }
 
         @media print { .controls, .btn-download { display: none; } .page { margin: 0; box-shadow: none; } }
     </style>
@@ -74,14 +69,15 @@
     <div class="controls">
         <h3>Customer & Trip</h3>
         <input type="text" id="in_cust" placeholder="Customer Name" oninput="update()">
+        <input type="datetime-local" id="in_pTime" oninput="update()">
         <input type="text" id="in_pLoc" placeholder="Pickup Address" oninput="update()">
+        <input type="datetime-local" id="in_dTime" oninput="update()">
         <input type="text" id="in_dLoc" placeholder="Drop Address" oninput="update()">
-        <input type="date" id="in_date" oninput="update()">
 
         <h3>Driver & Vehicle</h3>
         <input type="text" id="in_driver" placeholder="Driver Name" oninput="update()">
         <input type="text" id="in_vModel" placeholder="Vehicle (e.g. Sedan)" oninput="update()">
-        <input type="text" id="in_vNum" placeholder="Vehicle No (TN99...)" oninput="update()">
+        <input type="text" id="in_vNum" placeholder="Vehicle No" oninput="update()">
         <input type="file" onchange="loadMap(event)">
 
         <h3>KM Readings</h3>
@@ -95,19 +91,18 @@
         <input type="number" id="in_air" placeholder="Airport Charges" oninput="update()">
     </div>
 
-    <button class="btn-download" onclick="downloadPDF()">Download Professional Invoice</button>
+    <button class="btn-download" onclick="downloadPDF()">Download Sharp PDF Invoice</button>
 
     <div id="invoice-container">
         <div class="page" id="page1">
             <div class="header">
                 <div class="brand-box">
-                    <div class="logo-circle">GTK</div>
+                    <img src="logo.png" class="logo-img" alt="Logo">
                     <div>
                         <div class="brand-name">GET TAXI KOVAI</div>
                         <div class="slogan">Redefining Comfort, Every Mile.</div>
                     </div>
                 </div>
-                <div style="text-align:right; font-size:12px; padding-top:10px;" id="out_date1">11 Mar 2026</div>
             </div>
 
             <div class="hero-price">
@@ -118,7 +113,7 @@
             <div class="main-grid">
                 <div class="left-col">
                     <div class="section-label">Ride Details</div>
-                    <div class="map-box"><img id="mapPreview" src="https://via.placeholder.com/180x120?text=Route+Map"></div>
+                    <div class="map-box"><img id="mapPreview" src="https://via.placeholder.com/180x120?text=Map"></div>
                     <div style="text-align:center; font-size:14px; margin-bottom:10px;">Driver: <strong id="out_driver1">Name</strong></div>
                     
                     <div class="km-summary-box">
@@ -135,8 +130,14 @@
                     </div>
                     
                     <div class="timeline">
-                        <div class="timeline-row"><div class="time-tag">Start</div><div class="dot" style="background:green"></div><span id="out_pLoc1">Address</span></div>
-                        <div class="timeline-row"><div class="time-tag">End</div><div class="dot" style="background:orange"></div><span id="out_dLoc1">Address</span></div>
+                        <div class="timeline-row">
+                            <div class="time-header">START: <span id="out_pTime1">--</span></div>
+                            <div class="loc-text" id="out_pLoc1">Pickup Address</div>
+                        </div>
+                        <div class="timeline-row" style="border-left-color: #ffcc00;">
+                            <div class="time-header" style="color:#e65100;">END: <span id="out_dTime1">--</span></div>
+                            <div class="loc-text" id="out_dLoc1">Drop Address</div>
+                        </div>
                     </div>
                 </div>
 
@@ -159,13 +160,13 @@
                 </div>
             </div>
 
-            <div style="text-align:center; margin-top:35px; padding:15px; background:var(--accent); color:var(--dark); font-size:18px; font-weight:bold; border-radius:8px;">
+            <div class="payment-status">
                 Paid by UPI: ₹ <span class="out_total">0</span>
             </div>
 
             <div class="footer">
-                <strong>RELIABLE RIDES</strong> | No 286, D.B.Road, RS Puram, Coimbatore – 641002 <br>
-                📧 <a href="mailto:bookings@gettaxikovai.in">bookings@gettaxikovai.in</a> | 🌐 <a href="http://www.GetTaxiKovai.in">www.GetTaxiKovai.in</a> | 📞 <b>+91 90437 43777</b>
+                <strong>GET TAXI KOVAI</strong> | No 286, D.B.Road, RS Puram, Coimbatore – 641002 <br>
+                📧 bookings@gettaxikovai.in | 🌐 www.GetTaxiKovai.in | 📞 +91 90437 43777
             </div>
         </div>
 
@@ -179,7 +180,6 @@
                     <span id="out_vNum2">Vehicle Number</span><br>
                     <span id="out_vModel2">Vehicle Model</span>
                 </div>
-                <div style="text-align:right;">Invoice Date: <strong id="out_date2">Date</strong></div>
             </div>
 
             <table style="width:100%; border-collapse:collapse; margin-top:30px;">
@@ -195,7 +195,7 @@
                 </tr>
             </table>
             
-            <div style="margin-top:50px; font-size:11px; color:#777; border-left:4px solid var(--accent); padding-left:15px;">
+            <div style="margin-top:50px; font-size:11px; color:#777; border-left:4px solid var(--primary); padding-left:15px;">
                 1. This invoice is issued on behalf of Transport Service Provider.<br>
                 2. This is an electronically generated invoice and does not require a digital signature.
             </div>
@@ -219,8 +219,15 @@
             document.getElementById('out_vModel1').innerText = document.getElementById('in_vModel').value || "Sedan";
             document.getElementById('out_vNum1').innerText = document.getElementById('in_vNum').value || "TN 00 XX 0000";
             document.getElementById('out_tkm').innerText = totalKM;
-            document.getElementById('out_pLoc1').innerText = document.getElementById('in_pLoc').value || "Pickup";
-            document.getElementById('out_dLoc1').innerText = document.getElementById('in_dLoc').value || "Drop";
+            document.getElementById('out_pLoc1').innerText = document.getElementById('in_pLoc').value || "Pickup Address";
+            document.getElementById('out_dLoc1').innerText = document.getElementById('in_dLoc').value || "Drop Address";
+            
+            // Format Times
+            const pTime = document.getElementById('in_pTime').value;
+            const dTime = document.getElementById('in_dTime').value;
+            document.getElementById('out_pTime1').innerText = pTime ? pTime.replace('T', ' ') : "--";
+            document.getElementById('out_dTime1').innerText = dTime ? dTime.replace('T', ' ') : "--";
+
             document.getElementById('out_fare1').innerText = fare.toFixed(2);
             document.getElementById('out_toll1').innerText = toll.toFixed(2);
             document.getElementById('out_park1').innerText = park.toFixed(2);
@@ -237,10 +244,6 @@
             document.getElementById('out_air2').innerText = air.toFixed(2);
 
             document.querySelectorAll('.out_total').forEach(el => el.innerText = total);
-            const dateVal = document.getElementById('in_date').value;
-            const formattedDate = dateVal ? new Date(dateVal).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : "11 Mar 2026";
-            document.getElementById('out_date1').innerText = formattedDate;
-            document.getElementById('out_date2').innerText = formattedDate;
         }
 
         function loadMap(e) {
@@ -251,12 +254,13 @@
         async function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const canvas1 = await html2canvas(document.getElementById("page1"), { scale: 2 });
+            // Scale: 3 ensures high resolution for images/maps
+            const canvas1 = await html2canvas(document.getElementById("page1"), { scale: 3, useCORS: true });
             pdf.addImage(canvas1.toDataURL("image/png"), 'PNG', 0, 0, 210, 297);
             pdf.addPage();
-            const canvas2 = await html2canvas(document.getElementById("page2"), { scale: 2 });
+            const canvas2 = await html2canvas(document.getElementById("page2"), { scale: 3, useCORS: true });
             pdf.addImage(canvas2.toDataURL("image/png"), 'PNG', 0, 0, 210, 297);
-            pdf.save("GetTaxiKovai_Official_Invoice.pdf");
+            pdf.save("GetTaxiKovai_Invoice.pdf");
         }
     </script>
 </body>
