@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+
 <title>GET TAXI KOVAI Invoice</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -11,76 +12,84 @@
 <style>
 
 body{
-font-family:Arial, sans-serif;
-background:#f3f6fb;
+background:#eef2f7;
+font-family:Arial,Helvetica,sans-serif;
 margin:0;
 padding:15px;
 }
 
 .invoice{
-background:#fff;
-max-width:900px;
+width:210mm;
+min-height:297mm;
+background:white;
 margin:auto;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 15px rgba(0,0,0,.1);
+padding:18mm;
+box-shadow:0 0 12px rgba(0,0,0,.15);
+position:relative;
 }
 
-.topbar{
-height:8px;
-background:#1565c0;
-border-radius:6px 6px 0 0;
-margin:-20px -20px 15px -20px;
+.topbar,.bottombar{
+height:10px;
+background:#1e63b6;
+position:absolute;
+left:0;
+right:0;
 }
+
+.topbar{top:0;}
+.bottombar{bottom:0;}
 
 .header{
 display:flex;
 justify-content:space-between;
 align-items:center;
+margin-bottom:15px;
 }
 
 .brand{
-font-size:28px;
-font-weight:bold;
-color:#1565c0;
+font-size:30px;
+font-weight:700;
+color:#1e63b6;
+letter-spacing:1px;
 }
 
 .subtitle{
-font-size:13px;
-color:#555;
-}
-
-.section{
-margin-top:15px;
-}
-
-input{
-width:100%;
-padding:6px;
-margin:3px 0;
-border:1px solid #ccc;
-border-radius:5px;
+color:#666;
+font-size:14px;
 }
 
 .grid{
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:10px;
+gap:12px;
+margin-top:10px;
+}
+
+label{
+font-size:13px;
+color:#444;
+}
+
+input{
+width:100%;
+border:none;
+border-bottom:1px solid #ccc;
+padding:6px 2px;
+font-size:14px;
+background:transparent;
 }
 
 .kmgrid{
 display:grid;
 grid-template-columns:1fr 1fr 1fr;
 gap:10px;
+margin-top:12px;
 }
 
 .mapbox{
-width:5cm;
-height:4cm;
-border:1px solid #999;
-display:flex;
-align-items:center;
-justify-content:center;
+width:50mm;
+height:40mm;
+border:1px solid #aaa;
 overflow:hidden;
 }
 
@@ -93,41 +102,41 @@ object-fit:cover;
 table{
 width:100%;
 border-collapse:collapse;
-margin-top:10px;
-}
-
-th,td{
-border:1px solid #ddd;
-padding:8px;
-text-align:right;
+margin-top:15px;
 }
 
 th{
-background:#1565c0;
-color:#fff;
+background:#1e63b6;
+color:white;
+padding:8px;
+text-align:left;
+}
+
+td{
+border-bottom:1px solid #ddd;
+padding:8px;
+}
+
+.amount{
+text-align:right;
 }
 
 .total{
-font-size:20px;
-font-weight:bold;
 text-align:right;
-margin-top:10px;
+font-size:22px;
+font-weight:bold;
+margin-top:12px;
 }
 
 .footer{
-margin-top:25px;
-border-top:3px solid #1565c0;
-padding-top:8px;
+position:absolute;
+bottom:18mm;
+left:18mm;
+right:18mm;
 text-align:center;
 font-size:13px;
-color:#333;
-}
-
-.bottombar{
-height:8px;
-background:#1565c0;
-border-radius:0 0 6px 6px;
-margin:15px -20px -20px -20px;
+border-top:2px solid #1e63b6;
+padding-top:6px;
 }
 
 .buttons{
@@ -136,17 +145,16 @@ margin-top:15px;
 }
 
 button{
-background:#1565c0;
+background:#1e63b6;
 color:white;
 border:none;
-padding:10px 15px;
+padding:10px 16px;
 margin:5px;
 border-radius:6px;
-font-size:15px;
 }
 
-@media print{
-.buttons{display:none;}
+.fileinput{
+display:none;
 }
 
 </style>
@@ -163,38 +171,53 @@ font-size:15px;
 <div class="brand">GET TAXI KOVAI</div>
 <div class="subtitle">Your Trusted Travel Partner</div>
 </div>
-<img src="logo.png" height="55">
+<img src="logo.png" height="60">
 </div>
 
-<div class="section grid">
+<div class="grid">
 <div>
-Customer Name<input>
-Pickup Location<input>
-Drop Location<input>
+<label>Customer Name</label>
+<input>
+<label>Pickup Location</label>
+<input>
+<label>Drop Location</label>
+<input>
 </div>
 
 <div>
-Pickup Date & Time<input type="datetime-local">
-Drop Date & Time<input type="datetime-local">
-Vehicle / Driver<input placeholder="Editable">
+<label>Pickup Date & Time</label>
+<input type="datetime-local">
+<label>Drop Date & Time</label>
+<input type="datetime-local">
+<label>Vehicle / Driver</label>
+<input>
 </div>
 </div>
 
-<div class="section kmgrid">
-<div>Opening KM<input id="openkm" type="number" oninput="calcKM()"></div>
-<div>Closing KM<input id="closekm" type="number" oninput="calcKM()"></div>
-<div>Total KM<input id="totalkm" readonly></div>
+<div class="kmgrid">
+<div>
+<label>Opening KM</label>
+<input id="openkm" type="number" oninput="calcKM()">
+</div>
+<div>
+<label>Closing KM</label>
+<input id="closekm" type="number" oninput="calcKM()">
+</div>
+<div>
+<label>Total KM</label>
+<input id="totalkm" readonly>
+</div>
 </div>
 
-<div class="section grid">
+<div class="grid">
 
 <div>
 <table>
-<tr><th>Description</th><th>Amount ₹</th></tr>
+<tr><th>Description</th><th class="amount">Amount ₹</th></tr>
 <tr><td>Trip Fare</td><td><input class="amt" oninput="calcTotal()"></td></tr>
 <tr><td>Toll</td><td><input class="amt" oninput="calcTotal()"></td></tr>
 <tr><td>Parking</td><td><input class="amt" oninput="calcTotal()"></td></tr>
-<tr><td>Other Charges</td><td><input class="amt" oninput="calcTotal()"></td></tr>
+<tr><td>Other</td><td><input class="amt" oninput="calcTotal()"></td></tr>
 </table>
 
 <div class="total">
@@ -203,12 +226,12 @@ Total ₹ <span id="grand">0</span>
 </div>
 
 <div>
-<div>Route Map</div>
+<label>Route Map</label>
 <div class="mapbox">
 <img id="mapPreview">
 </div>
-<input type="file" accept="image/*"
-onchange="loadMap(event)">
+<button onclick="document.getElementById('mapUpload').click()">Upload Map</button>
+<input id="mapUpload" class="fileinput" type="file" accept="image/*" onchange="loadMap(event)">
 </div>
 
 </div>
@@ -226,7 +249,6 @@ onchange="loadMap(event)">
 
 <div class="buttons">
 <button onclick="downloadPDF()">Download PDF</button>
-<button onclick="shareWhatsApp()">Share WhatsApp</button>
 </div>
 
 <script>
@@ -234,7 +256,7 @@ onchange="loadMap(event)">
 function calcKM(){
 let o=parseFloat(openkm.value)||0;
 let c=parseFloat(closekm.value)||0;
-totalkm.value=(c-o>0)?c-o:0;
+totalkm.value=(c>o)?(c-o):0;
 }
 
 function calcTotal(){
@@ -251,23 +273,12 @@ mapPreview.src=URL.createObjectURL(e.target.files[0]);
 
 async function downloadPDF(){
 const { jsPDF } = window.jspdf;
-const invoice=document.getElementById("invoice");
-
-const canvas=await html2canvas(invoice,{scale:2});
+const canvas=await html2canvas(document.getElementById("invoice"),{scale:2});
 const img=canvas.toDataURL("image/png");
 
 const pdf=new jsPDF('p','mm','a4');
-const width=210;
-const height=(canvas.height*width)/canvas.width;
-
-pdf.addImage(img,'PNG',0,0,width,height);
+pdf.addImage(img,'PNG',0,0,210,297);
 pdf.save("GetTaxiKovai_Invoice.pdf");
-}
-
-function shareWhatsApp(){
-let total=document.getElementById("grand").innerText;
-let text=`GET TAXI KOVAI Invoice\nTotal Amount ₹ ${total}\nThank you for choosing us!`;
-window.open("https://wa.me/?text="+encodeURIComponent(text));
 }
 
 </script>
