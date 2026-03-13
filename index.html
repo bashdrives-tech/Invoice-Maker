@@ -3,26 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GET TAXI KOVAI - Professional Invoice</title>
+    <title>GET TAXI KOVAI - Intelligent Invoice System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { 
             --primary: #1e63b6; 
-            --soft-blue: #e3f2fd; /* New soft blue for print-friendly bar */
+            --soft-blue: #e3f2fd; 
             --gray: #666; 
             --dark: #222;
         }
         body { background: #eef2f7; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         
-        .controls { width: 210mm; background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .controls input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
-        .controls h3 { grid-column: span 4; margin: 5px 0; font-size: 16px; color: var(--primary); border-bottom: 1px solid #eee; }
+        /* Control Panel */
+        .controls { width: 210mm; background: white; padding: 25px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; position: relative; }
+        .controls input, .controls select { padding: 10px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 13px; transition: 0.3s; }
+        .controls input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(30,99,182,0.1); }
+        .controls h3 { grid-column: span 4; margin: 10px 0 5px; font-size: 15px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
         
-        .btn-download { background: var(--primary); color: white; border: none; padding: 12px 40px; font-size: 16px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; font-weight: bold; }
+        /* Menu Buttons */
+        .menu-dots { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: var(--gray); }
+        .history-panel { display: none; position: absolute; top: 50px; right: 20px; width: 300px; background: white; border: 1px solid #ddd; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 8px; z-index: 100; max-height: 400px; overflow-y: auto; padding: 10px; }
+        .history-item { padding: 10px; border-bottom: 1px solid #eee; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .history-item:hover { background: #f8f9fa; }
+        .history-btn { padding: 4px 8px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; }
 
+        .btn-download { background: var(--primary); color: white; border: none; padding: 14px 50px; font-size: 16px; border-radius: 8px; cursor: pointer; margin-bottom: 30px; font-weight: bold; box-shadow: 0 4px 15px rgba(30,99,182,0.3); transition: 0.2s; }
+        .btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(30,99,182,0.4); }
+
+        /* PREVIEW CONTAINER - UNTOUCHED BEAUTY */
         #invoice-container { width: 210mm; }
-        .page { width: 210mm; height: 297mm; background: white; padding: 18mm; margin-bottom: 20px; box-sizing: border-box; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); overflow: hidden; }
+        .page { width: 210mm; height: 297mm; background: white; padding: 18mm; margin-bottom: 20px; box-sizing: border-box; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); overflow: hidden; }
 
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 3px solid var(--primary); padding-bottom: 15px; }
         .brand-box { display: flex; align-items: center; gap: 15px; }
@@ -55,11 +66,9 @@
         .time-header { display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--primary); font-size: 12px; }
         .loc-text { padding-top: 4px; color: var(--dark); }
 
-        .footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; padding: 15px; background: var(--primary); color: white; }
-        .footer a { color: #fff; text-decoration: none; font-weight: bold; }
-
-        /* Payment Status - Updated to soft blue */
         .payment-status { text-align: center; margin-top: 35px; padding: 15px; background: var(--soft-blue); color: var(--primary); font-size: 18px; font-weight: bold; border-radius: 8px; border: 1px solid #bbdefb; }
+
+        .footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; padding: 15px; background: var(--primary); color: white; }
 
         @media print { .controls, .btn-download { display: none; } .page { margin: 0; box-shadow: none; } }
     </style>
@@ -67,8 +76,20 @@
 <body>
 
     <div class="controls">
-        <h3>Customer & Trip</h3>
+        <div class="menu-dots" onclick="toggleHistory()">⋮</div>
+        <div class="history-panel" id="historyPanel">
+            <h4 style="margin-top:0;">Bill History</h4>
+            <div id="historyList">No saved bills yet.</div>
+        </div>
+
+        <h3>Saved Customers</h3>
+        <select id="custSelector" onchange="selectCustomer(this.value)" style="grid-column: span 4; background: #f0f7ff; font-weight: bold;">
+            <option value="">-- Choose Existing Customer --</option>
+        </select>
+
+        <h3>Trip & Customer Details</h3>
         <input type="text" id="in_cust" placeholder="Customer Name" oninput="update()">
+        <input type="text" id="in_mobile" placeholder="Customer Mobile" oninput="update()">
         <input type="datetime-local" id="in_pTime" oninput="update()">
         <input type="text" id="in_pLoc" placeholder="Pickup Address" oninput="update()">
         <input type="datetime-local" id="in_dTime" oninput="update()">
@@ -76,7 +97,7 @@
 
         <h3>Driver & Vehicle</h3>
         <input type="text" id="in_driver" placeholder="Driver Name" oninput="update()">
-        <input type="text" id="in_vModel" placeholder="Vehicle (e.g. Sedan)" oninput="update()">
+        <input type="text" id="in_vModel" placeholder="Vehicle Model" oninput="update()">
         <input type="text" id="in_vNum" placeholder="Vehicle No" oninput="update()">
         <input type="file" onchange="loadMap(event)">
 
@@ -91,7 +112,7 @@
         <input type="number" id="in_air" placeholder="Airport Charges" oninput="update()">
     </div>
 
-    <button class="btn-download" onclick="downloadPDF()">Download Sharp PDF Invoice</button>
+    <button class="btn-download" onclick="downloadPDF()">Download & Save Bill</button>
 
     <div id="invoice-container">
         <div class="page" id="page1">
@@ -108,6 +129,7 @@
             <div class="hero-price">
                 <h1>₹ <span class="out_total">0</span></h1>
                 <p>Thanks for travelling with us, <span id="out_cust1">Customer</span></p>
+                <div style="font-size:13px; color:#666;" id="out_mobile1"></div>
             </div>
 
             <div class="main-grid">
@@ -180,6 +202,10 @@
                     <span id="out_vNum2">Vehicle Number</span><br>
                     <span id="out_vModel2">Vehicle Model</span>
                 </div>
+                <div style="text-align:right;">
+                    Customer: <strong id="out_cust2">Name</strong><br>
+                    Mobile: <span id="out_mobile2">--</span>
+                </div>
             </div>
 
             <table style="width:100%; border-collapse:collapse; margin-top:30px;">
@@ -203,6 +229,10 @@
     </div>
 
     <script>
+        // --- DATA PERSISTENCE LOGIC ---
+        let customers = JSON.parse(localStorage.getItem('gtk_customers')) || [];
+        let bills = JSON.parse(localStorage.getItem('gtk_bills')) || [];
+
         function update() {
             const fare = parseFloat(document.getElementById('in_fare').value) || 0;
             const toll = parseFloat(document.getElementById('in_toll').value) || 0;
@@ -215,6 +245,9 @@
             const totalKM = (ckm > okm) ? (ckm - okm) : 0;
 
             document.getElementById('out_cust1').innerText = document.getElementById('in_cust').value || "Customer";
+            document.getElementById('out_cust2').innerText = document.getElementById('in_cust').value || "Customer";
+            document.getElementById('out_mobile1').innerText = document.getElementById('in_mobile').value;
+            document.getElementById('out_mobile2').innerText = document.getElementById('in_mobile').value;
             document.getElementById('out_driver1').innerText = document.getElementById('in_driver').value || "Name";
             document.getElementById('out_vModel1').innerText = document.getElementById('in_vModel').value || "Sedan";
             document.getElementById('out_vNum1').innerText = document.getElementById('in_vNum').value || "TN 00 XX 0000";
@@ -222,7 +255,6 @@
             document.getElementById('out_pLoc1').innerText = document.getElementById('in_pLoc').value || "Pickup Address";
             document.getElementById('out_dLoc1').innerText = document.getElementById('in_dLoc').value || "Drop Address";
             
-            // Format Times
             const pTime = document.getElementById('in_pTime').value;
             const dTime = document.getElementById('in_dTime').value;
             document.getElementById('out_pTime1').innerText = pTime ? pTime.replace('T', ' ') : "--";
@@ -246,22 +278,91 @@
             document.querySelectorAll('.out_total').forEach(el => el.innerText = total);
         }
 
+        function toggleHistory() {
+            const panel = document.getElementById('historyPanel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            const selector = document.getElementById('custSelector');
+            
+            // Render Bills
+            list.innerHTML = bills.length ? '' : 'No saved bills yet.';
+            bills.slice().reverse().forEach((bill, idx) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div><b>${bill.cust}</b><br><small>${bill.date}</small></div>
+                    <button class="history-btn" onclick="copyBill(${bills.length - 1 - idx})">Copy</button>
+                `;
+                list.appendChild(item);
+            });
+
+            // Render Customer Dropdown
+            selector.innerHTML = '<option value="">-- Choose Existing Customer --</option>';
+            customers.forEach((c, idx) => {
+                selector.innerHTML += `<option value="${idx}">${c.name} (${c.mobile})</option>`;
+            });
+        }
+
+        function selectCustomer(idx) {
+            if (idx === "") return;
+            const c = customers[idx];
+            document.getElementById('in_cust').value = c.name;
+            document.getElementById('in_mobile').value = c.mobile;
+            document.getElementById('in_pLoc').value = c.addr;
+            update();
+        }
+
+        function copyBill(idx) {
+            const b = bills[idx];
+            for (let key in b.data) {
+                const el = document.getElementById(key);
+                if (el) el.value = b.data[key];
+            }
+            toggleHistory();
+            update();
+        }
+
         function loadMap(e) {
             const file = e.target.files[0];
             if (file) { document.getElementById('mapPreview').src = URL.createObjectURL(file); }
         }
 
         async function downloadPDF() {
+            const custName = document.getElementById('in_cust').value;
+            const mobile = document.getElementById('in_mobile').value;
+            const addr = document.getElementById('in_pLoc').value;
+
+            if (!custName) { alert("Please enter Customer Name"); return; }
+
+            // Save Customer if new
+            if (!customers.find(c => c.mobile === mobile)) {
+                customers.push({ name: custName, mobile: mobile, addr: addr });
+                localStorage.setItem('gtk_customers', JSON.stringify(customers));
+            }
+
+            // Save Bill to History
+            const formData = {};
+            document.querySelectorAll('.controls input').forEach(i => formData[i.id] = i.value);
+            bills.push({ cust: custName, date: new Date().toLocaleString(), data: formData });
+            localStorage.setItem('gtk_bills', JSON.stringify(bills));
+
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
-            // Scale: 3 ensures high resolution for images/maps
             const canvas1 = await html2canvas(document.getElementById("page1"), { scale: 3, useCORS: true });
             pdf.addImage(canvas1.toDataURL("image/png"), 'PNG', 0, 0, 210, 297);
             pdf.addPage();
             const canvas2 = await html2canvas(document.getElementById("page2"), { scale: 3, useCORS: true });
             pdf.addImage(canvas2.toDataURL("image/png"), 'PNG', 0, 0, 210, 297);
-            pdf.save("GetTaxiKovai_Invoice.pdf");
+            pdf.save(`GTK_${custName.replace(/\s+/g, '_')}_Invoice.pdf`);
+            renderHistory();
         }
+
+        // Initial Load
+        renderHistory();
     </script>
 </body>
 </html>
