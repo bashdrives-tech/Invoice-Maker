@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GET TAXI KOVAI Invoice Maker</title>
+    <title>GET TAXI KOVAI - Professional Invoice</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --primary: #1e63b6; --gray: #666; --light-bg: #f8f9fa; }
+        :root { 
+            --primary: #1e63b6; 
+            --accent: #ffcc00; /* Vibrant Yellow for highlights */
+            --gray: #666; 
+            --dark: #222;
+        }
         body { background: #eef2f7; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         
         /* Control Panel */
@@ -19,39 +24,47 @@
 
         /* Invoice Container */
         #invoice-container { width: 210mm; }
-        .page { width: 210mm; height: 297mm; background: white; padding: 18mm; margin-bottom: 20px; box-sizing: border-box; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        .page { width: 210mm; height: 297mm; background: white; padding: 18mm; margin-bottom: 20px; box-sizing: border-box; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); overflow: hidden; }
 
-        /* Header Style */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .brand { font-size: 28px; font-weight: 800; color: var(--primary); }
+        /* Header & Logo */
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 3px solid var(--accent); padding-bottom: 15px; }
+        .brand-box { display: flex; align-items: center; gap: 15px; }
+        .logo-circle { width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 24px; border: 3px solid var(--accent); }
+        .brand-name { font-size: 28px; font-weight: 800; color: var(--primary); margin: 0; line-height: 1; }
+        .slogan { font-size: 12px; color: var(--gray); font-style: italic; margin-top: 4px; }
+
         .hero-price { text-align: center; margin: 25px 0; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        .hero-price h1 { font-size: 50px; margin: 0; font-weight: 500; }
+        .hero-price h1 { font-size: 50px; margin: 0; font-weight: 500; color: var(--dark); }
 
         /* Layout Grid */
         .main-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; }
-        .section-label { font-size: 12px; font-weight: bold; color: #999; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; text-align: center; }
+        .section-label { font-size: 12px; font-weight: bold; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; text-align: center; background: #f0f7ff; }
 
-        /* Map Resized */
-        .map-box { width: 100%; max-width: 200px; height: 140px; margin: 0 auto 10px; border: 1px solid #ddd; overflow: hidden; border-radius: 4px; }
+        /* Map & KM Stats */
+        .map-box { width: 100%; max-width: 180px; height: 120px; margin: 0 auto 10px; border: 1px solid #ddd; overflow: hidden; border-radius: 4px; }
         .map-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        .ride-info-box { text-align: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; border-top: 1px solid #eee; padding-top: 10px; }
+        .km-summary-box { background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #eee; margin: 15px 0; }
+        .km-row { display: flex; justify-content: space-around; font-size: 12px; text-align: center; }
+        .km-row b { display: block; font-size: 14px; color: var(--primary); }
+
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
 
         /* Table Style */
         .bill-table { width: 100%; border-collapse: collapse; font-size: 14px; }
         .bill-table td { padding: 10px 0; color: var(--gray); }
         .bill-table td.amt { text-align: right; color: #000; font-weight: 500; }
-        .grand-total { border-top: 2px solid #000; font-weight: bold; font-size: 18px; color: #000 !important; }
+        .grand-total { border-top: 2.5px solid var(--primary); font-weight: bold; font-size: 20px; color: var(--primary) !important; }
 
         /* Timeline */
-        .timeline { margin-top: 20px; font-size: 13px; }
-        .timeline-row { display: flex; align-items: center; margin-bottom: 10px; }
-        .time-tag { width: 50px; font-weight: bold; }
+        .timeline { margin-top: 15px; font-size: 13px; }
+        .timeline-row { display: flex; align-items: center; margin-bottom: 8px; }
+        .time-tag { width: 50px; font-weight: bold; color: var(--primary); }
         .dot { height: 8px; width: 8px; border-radius: 50%; margin: 0 10px; }
 
-        /* Footer */
-        .footer { position: absolute; bottom: 15mm; left: 18mm; right: 18mm; text-align: center; font-size: 11px; color: #888; border-top: 1px solid #eee; padding-top: 10px; }
+        /* Colorful Footer */
+        .footer { position: absolute; bottom: 10mm; left: 0; right: 0; text-align: center; font-size: 11px; padding: 15px; background: var(--primary); color: white; }
+        .footer a { color: var(--accent); text-decoration: none; font-weight: bold; }
 
         @media print { .controls, .btn-download { display: none; } .page { margin: 0; box-shadow: none; } }
     </style>
@@ -87,11 +100,14 @@
     <div id="invoice-container">
         <div class="page" id="page1">
             <div class="header">
-                <div>
-                    <div class="brand">GET TAXI KOVAI</div>
-                    <div style="font-size:12px; color:#666;">Coimbatore Local Service</div>
+                <div class="brand-box">
+                    <div class="logo-circle">GTK</div>
+                    <div>
+                        <div class="brand-name">GET TAXI KOVAI</div>
+                        <div class="slogan">Redefining Comfort, Every Mile.</div>
+                    </div>
                 </div>
-                <div style="text-align:right; font-size:12px;" id="out_date1">11 Feb 2026</div>
+                <div style="text-align:right; font-size:12px; padding-top:10px;" id="out_date1">11 Mar 2026</div>
             </div>
 
             <div class="hero-price">
@@ -102,17 +118,25 @@
             <div class="main-grid">
                 <div class="left-col">
                     <div class="section-label">Ride Details</div>
-                    <div class="map-box"><img id="mapPreview" src="https://via.placeholder.com/200x140?text=Route+Map"></div>
-                    <div class="ride-info-box">You rode with <strong id="out_driver1">Driver</strong></div>
+                    <div class="map-box"><img id="mapPreview" src="https://via.placeholder.com/180x120?text=Route+Map"></div>
+                    <div style="text-align:center; font-size:14px; margin-bottom:10px;">Driver: <strong id="out_driver1">Name</strong></div>
+                    
+                    <div class="km-summary-box">
+                        <div class="km-row">
+                            <div>Opening<b id="out_okm1">0</b></div>
+                            <div style="border-left:1px solid #ddd; border-right:1px solid #ddd; padding:0 15px;">Closing<b id="out_ckm1">0</b></div>
+                            <div>Total KM<b id="out_tkm" style="color:#d32f2f;">0</b></div>
+                        </div>
+                    </div>
+
                     <div class="stat-grid">
-                        <div>KM: <strong id="out_tkm">0</strong></div>
-                        <div>Type: <strong id="out_vModel1">Sedan</strong></div>
-                        <div style="grid-column: span 2; border-top:1px solid #eee; padding-top:5px;">Vehicle: <strong id="out_vNum1">TN 00 XX 0000</strong></div>
+                        <div>Vehicle: <strong id="out_vModel1">Sedan</strong></div>
+                        <div>Reg No: <strong id="out_vNum1">TN 00 XX 0000</strong></div>
                     </div>
                     
                     <div class="timeline">
-                        <div class="timeline-row"><div class="time-tag">Pickup</div><div class="dot" style="background:green"></div><span id="out_pLoc1">Address</span></div>
-                        <div class="timeline-row"><div class="time-tag">Drop</div><div class="dot" style="background:orange"></div><span id="out_dLoc1">Address</span></div>
+                        <div class="timeline-row"><div class="time-tag">Start</div><div class="dot" style="background:green"></div><span id="out_pLoc1">Address</span></div>
+                        <div class="timeline-row"><div class="time-tag">End</div><div class="dot" style="background:orange"></div><span id="out_dLoc1">Address</span></div>
                     </div>
                 </div>
 
@@ -129,25 +153,25 @@
                         </tr>
                     </table>
                     <div style="margin-top:20px; font-size:11px; color:#888; line-height:1.5;">
-                        Opening KM: <span id="out_okm1">0</span> | Closing KM: <span id="out_ckm1">0</span><br><br>
-                        We've fulfilled our promise to take you to destination for pre-agreed Total Fare.
+                        <p style="background:#fff3cd; color:#856404; padding:8px; border-radius:4px;">We've fulfilled our promise to take you to destination for pre-agreed Total Fare.</p>
+                        Includes 0.00 Taxes
                     </div>
                 </div>
             </div>
 
-            <div style="text-align:center; margin-top:40px; padding:15px; background:#f9f9f9; border:1px solid #eee; font-size:16px;">
+            <div style="text-align:center; margin-top:35px; padding:15px; background:var(--accent); color:var(--dark); font-size:18px; font-weight:bold; border-radius:8px;">
                 Paid by UPI: ₹ <span class="out_total">0</span>
             </div>
 
             <div class="footer">
-                <strong>Reliable Rides</strong> No 286, D.B.Road, RS Puram, Coimbatore – 641002<br>
-                📧 bookings@gettaxikovai.in | 🌐 www.GetTaxiKovai.in | 📞 +91 90437 43777
+                <strong>RELIABLE RIDES</strong> | No 286, D.B.Road, RS Puram, Coimbatore – 641002 <br>
+                📧 <a href="mailto:bookings@gettaxikovai.in">bookings@gettaxikovai.in</a> | 🌐 <a href="http://www.GetTaxiKovai.in">www.GetTaxiKovai.in</a> | 📞 <b>+91 90437 43777</b>
             </div>
         </div>
 
         <div class="page" id="page2">
-            <div style="text-align:center; font-size:12px; margin-bottom:5px;">Original Tax Invoice</div>
-            <h2 style="border-bottom:2px solid #000; padding-bottom:10px;">Driver Trip Invoice</h2>
+            <div style="text-align:center; font-size:12px; margin-bottom:5px; color:var(--gray);">Original Tax Invoice</div>
+            <h2 style="border-bottom:3px solid var(--primary); padding-bottom:10px; color:var(--primary);">Driver Trip Invoice</h2>
             
             <div style="display:flex; justify-content:space-between; margin:20px 0; font-size:14px;">
                 <div>
@@ -159,19 +183,19 @@
             </div>
 
             <table style="width:100%; border-collapse:collapse; margin-top:30px;">
-                <tr style="border-bottom:1px solid #000; font-weight:bold;">
-                    <td style="padding:10px;">Description</td><td style="text-align:right; padding:10px;">Amount (₹)</td>
+                <tr style="border-bottom:2px solid var(--dark); font-weight:bold; background:#f4f4f4;">
+                    <td style="padding:12px;">Description</td><td style="text-align:right; padding:12px;">Amount (₹)</td>
                 </tr>
-                <tr><td style="padding:10px; border-bottom:1px solid #eee;">Ride Fee</td><td style="text-align:right;" id="out_fare2">0.00</td></tr>
-                <tr><td style="padding:10px; border-bottom:1px solid #eee;">Toll & Convenience Fee</td><td style="text-align:right;" id="out_toll2">0.00</td></tr>
-                <tr><td style="padding:10px; border-bottom:1px solid #eee;">Parking Charges</td><td style="text-align:right;" id="out_park2">0.00</td></tr>
-                <tr><td style="padding:10px; border-bottom:1px solid #eee;">Airport Charges</td><td style="text-align:right;" id="out_air2">0.00</td></tr>
-                <tr style="font-weight:bold; font-size:20px;">
-                    <td style="padding:10px;">Total Fare</td><td style="text-align:right;">₹ <span class="out_total">0</span></td>
+                <tr><td style="padding:12px; border-bottom:1px solid #eee;">Ride Fee</td><td style="text-align:right;" id="out_fare2">0.00</td></tr>
+                <tr><td style="padding:12px; border-bottom:1px solid #eee;">Toll & Convenience Fee</td><td style="text-align:right;" id="out_toll2">0.00</td></tr>
+                <tr><td style="padding:12px; border-bottom:1px solid #eee;">Parking Charges</td><td style="text-align:right;" id="out_park2">0.00</td></tr>
+                <tr><td style="padding:12px; border-bottom:1px solid #eee;">Airport Charges</td><td style="text-align:right;" id="out_air2">0.00</td></tr>
+                <tr style="font-weight:bold; font-size:24px; color:var(--primary);">
+                    <td style="padding:12px;">Total Fare</td><td style="text-align:right;">₹ <span class="out_total">0</span></td>
                 </tr>
             </table>
             
-            <div style="margin-top:50px; font-size:11px; color:#777;">
+            <div style="margin-top:50px; font-size:11px; color:#777; border-left:4px solid var(--accent); padding-left:15px;">
                 1. This invoice is issued on behalf of Transport Service Provider.<br>
                 2. This is an electronically generated invoice and does not require a digital signature.
             </div>
@@ -180,7 +204,6 @@
 
     <script>
         function update() {
-            // Numbers
             const fare = parseFloat(document.getElementById('in_fare').value) || 0;
             const toll = parseFloat(document.getElementById('in_toll').value) || 0;
             const park = parseFloat(document.getElementById('in_park').value) || 0;
@@ -191,9 +214,8 @@
             const total = (fare + toll + park + air).toFixed(0);
             const totalKM = (ckm > okm) ? (ckm - okm) : 0;
 
-            // Sync Page 1
             document.getElementById('out_cust1').innerText = document.getElementById('in_cust').value || "Customer";
-            document.getElementById('out_driver1').innerText = document.getElementById('in_driver').value || "Driver";
+            document.getElementById('out_driver1').innerText = document.getElementById('in_driver').value || "Name";
             document.getElementById('out_vModel1').innerText = document.getElementById('in_vModel').value || "Sedan";
             document.getElementById('out_vNum1').innerText = document.getElementById('in_vNum').value || "TN 00 XX 0000";
             document.getElementById('out_tkm').innerText = totalKM;
@@ -206,8 +228,7 @@
             document.getElementById('out_okm1').innerText = okm;
             document.getElementById('out_ckm1').innerText = ckm;
 
-            // Sync Page 2
-            document.getElementById('out_driver2').innerText = document.getElementById('in_driver').value || "Driver";
+            document.getElementById('out_driver2').innerText = document.getElementById('in_driver').value || "Driver Name";
             document.getElementById('out_vNum2').innerText = document.getElementById('in_vNum').value || "Vehicle Number";
             document.getElementById('out_vModel2').innerText = document.getElementById('in_vModel').value || "Model";
             document.getElementById('out_fare2').innerText = fare.toFixed(2);
@@ -215,10 +236,9 @@
             document.getElementById('out_park2').innerText = park.toFixed(2);
             document.getElementById('out_air2').innerText = air.toFixed(2);
 
-            // Totals and Dates
             document.querySelectorAll('.out_total').forEach(el => el.innerText = total);
             const dateVal = document.getElementById('in_date').value;
-            const formattedDate = dateVal ? new Date(dateVal).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : "11 Feb 2026";
+            const formattedDate = dateVal ? new Date(dateVal).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : "11 Mar 2026";
             document.getElementById('out_date1').innerText = formattedDate;
             document.getElementById('out_date2').innerText = formattedDate;
         }
@@ -236,7 +256,7 @@
             pdf.addPage();
             const canvas2 = await html2canvas(document.getElementById("page2"), { scale: 2 });
             pdf.addImage(canvas2.toDataURL("image/png"), 'PNG', 0, 0, 210, 297);
-            pdf.save("GetTaxiKovai_Invoice.pdf");
+            pdf.save("GetTaxiKovai_Official_Invoice.pdf");
         }
     </script>
 </body>
