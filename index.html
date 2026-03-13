@@ -1,144 +1,152 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GET TAXI KOVAI Invoice</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
 
-:root{
---primary:#0f172a;
---accent:#2563eb;
---light:#f8fafc;
---border:#e5e7eb;
-}
-
 body{
-background:var(--light);
-font-family:Arial,Helvetica,sans-serif;
+font-family:Arial, sans-serif;
+background:#f3f6fb;
 margin:0;
-padding:20px;
+padding:15px;
 }
 
-.invoice-container{
-max-width:850px;
+.invoice{
+background:#fff;
+max-width:900px;
 margin:auto;
-background:white;
-padding:30px;
+padding:20px;
 border-radius:10px;
-border-top:6px solid var(--accent);
-box-shadow:0 0 20px rgba(0,0,0,0.08);
+box-shadow:0 0 15px rgba(0,0,0,.1);
 }
 
-.company-header{
+.topbar{
+height:8px;
+background:#1565c0;
+border-radius:6px 6px 0 0;
+margin:-20px -20px 15px -20px;
+}
+
+.header{
 display:flex;
 justify-content:space-between;
 align-items:center;
-border-bottom:1px solid var(--border);
-padding-bottom:15px;
-margin-bottom:20px;
 }
 
-.company-name{
+.brand{
 font-size:28px;
-font-weight:800;
-color:var(--primary);
+font-weight:bold;
+color:#1565c0;
 }
 
-.company-tag{
+.subtitle{
 font-size:13px;
-color:#64748b;
+color:#555;
 }
 
-label{
-font-size:14px;
-color:#444;
+.section{
+margin-top:15px;
 }
 
 input{
 width:100%;
-border:none;
-border-bottom:1px solid #ccc;
 padding:6px;
-font-size:14px;
-margin-bottom:12px;
+margin:3px 0;
+border:1px solid #ccc;
+border-radius:5px;
 }
 
-.invoice-row{
-display:flex;
-justify-content:space-between;
-border-bottom:1px dashed var(--border);
-padding:8px 0;
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
 }
 
-.invoice-row input{
-width:120px;
-text-align:right;
+.kmgrid{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:10px;
 }
 
-.total-box{
-text-align:right;
-font-size:22px;
-font-weight:bold;
-margin-top:15px;
-color:var(--primary);
-}
-
-.route-box{
-border:1px solid var(--border);
-border-radius:8px;
-height:200px;
-background:#fafafa;
+.mapbox{
+width:5cm;
+height:4cm;
+border:1px solid #999;
 display:flex;
 align-items:center;
 justify-content:center;
 overflow:hidden;
 }
 
-.route-box img{
-max-width:100%;
+.mapbox img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:8px;
+text-align:right;
+}
+
+th{
+background:#1565c0;
+color:#fff;
+}
+
+.total{
+font-size:20px;
+font-weight:bold;
+text-align:right;
+margin-top:10px;
+}
+
+.footer{
+margin-top:25px;
+border-top:3px solid #1565c0;
+padding-top:8px;
+text-align:center;
+font-size:13px;
+color:#333;
+}
+
+.bottombar{
+height:8px;
+background:#1565c0;
+border-radius:0 0 6px 6px;
+margin:15px -20px -20px -20px;
+}
+
+.buttons{
+text-align:center;
+margin-top:15px;
 }
 
 button{
-background:var(--accent);
+background:#1565c0;
 color:white;
 border:none;
 padding:10px 15px;
-margin-top:15px;
+margin:5px;
 border-radius:6px;
-font-size:14px;
-cursor:pointer;
-}
-
-button:hover{
-opacity:0.9;
-}
-
-.invoice-footer{
-margin-top:45px;
-padding-top:12px;
-border-top:2px solid black;
-text-align:center;
-font-size:12px;
-letter-spacing:0.3px;
+font-size:15px;
 }
 
 @media print{
-
-button,
-.upload-btn{
-display:none !important;
-}
-
-body{
-background:white;
-}
-
-.invoice-container{
-box-shadow:none;
-border-radius:0;
-}
-
+.buttons{display:none;}
 }
 
 </style>
@@ -146,127 +154,120 @@ border-radius:0;
 
 <body>
 
-<div class="invoice-container" id="invoice">
+<div id="invoice" class="invoice">
 
-<div class="company-header">
+<div class="topbar"></div>
+
+<div class="header">
+<div>
+<div class="brand">GET TAXI KOVAI</div>
+<div class="subtitle">Your Trusted Travel Partner</div>
+</div>
+<img src="logo.png" height="55">
+</div>
+
+<div class="section grid">
+<div>
+Customer Name<input>
+Pickup Location<input>
+Drop Location<input>
+</div>
 
 <div>
-<div class="company-name">GET TAXI KOVAI</div>
-<div class="company-tag">Taxi & Travel Partner</div>
+Pickup Date & Time<input type="datetime-local">
+Drop Date & Time<input type="datetime-local">
+Vehicle / Driver<input placeholder="Editable">
+</div>
 </div>
 
-<img src="logo.png" height="55">
-
+<div class="section kmgrid">
+<div>Opening KM<input id="openkm" type="number" oninput="calcKM()"></div>
+<div>Closing KM<input id="closekm" type="number" oninput="calcKM()"></div>
+<div>Total KM<input id="totalkm" readonly></div>
 </div>
 
-<label>Invoice No</label>
-<input placeholder="GTK-0001">
+<div class="section grid">
 
-<label>Customer Name</label>
-<input id="customer">
+<div>
+<table>
+<tr><th>Description</th><th>Amount ₹</th></tr>
+<tr><td>Trip Fare</td><td><input class="amt" oninput="calcTotal()"></td></tr>
+<tr><td>Toll</td><td><input class="amt" oninput="calcTotal()"></td></tr>
+<tr><td>Parking</td><td><input class="amt" oninput="calcTotal()"></td></tr>
+<tr><td>Other Charges</td><td><input class="amt" oninput="calcTotal()"></td></tr>
+</table>
 
-<label>Driver Name</label>
-<input>
-
-<label>Vehicle</label>
-<input>
-
-<label>Cab Number</label>
-<input>
-
-<h3>Trip Timeline</h3>
-
-<label>Pickup Date & Time</label>
-<input type="datetime-local">
-
-<label>Drop Date & Time</label>
-<input type="datetime-local">
-
-<h3>Charges</h3>
-
-<div class="invoice-row">
-<span>Trip Fare</span>
-<input id="fare" type="number" oninput="calc()">
+<div class="total">
+Total ₹ <span id="grand">0</span>
+</div>
 </div>
 
-<div class="invoice-row">
-<span>Toll Charges</span>
-<input id="toll" type="number" oninput="calc()">
-</div>
-
-<div class="invoice-row">
-<span>Parking</span>
-<input id="parking" type="number" oninput="calc()">
-</div>
-
-<div class="invoice-row">
-<span>Other Charges</span>
-<input id="other" type="number" oninput="calc()">
-</div>
-
-<div class="total-box">
-Total ₹ <span id="total">0</span>
-</div>
-
-<h3>Route Map</h3>
-
-<div class="route-box">
+<div>
+<div>Route Map</div>
+<div class="mapbox">
 <img id="mapPreview">
 </div>
+<input type="file" accept="image/*"
+onchange="loadMap(event)">
+</div>
 
-<input type="file" class="upload-btn" onchange="loadMap(event)">
+</div>
 
-<br>
-
-<button onclick="downloadPDF()">Download Invoice</button>
-<button onclick="shareWhatsApp()">Share WhatsApp</button>
-
-<div class="invoice-footer">
-GET TAXI KOVAI | 286 B, Diwan Bahadur Road, RS Puram, Coimbatore – 641002 |
+<div class="footer">
+286 B, Diwan Bahadur Road, RS Puram, Coimbatore – 641002 |
 📞 +91 90437 43777 |
 ✉ Bookings@gettaxikovai.in |
 🌐 www.gettaxikovai.in
 </div>
 
+<div class="bottombar"></div>
+
+</div>
+
+<div class="buttons">
+<button onclick="downloadPDF()">Download PDF</button>
+<button onclick="shareWhatsApp()">Share WhatsApp</button>
 </div>
 
 <script>
 
-function calc(){
-
-let fare=parseFloat(document.getElementById("fare").value)||0
-let toll=parseFloat(document.getElementById("toll").value)||0
-let parking=parseFloat(document.getElementById("parking").value)||0
-let other=parseFloat(document.getElementById("other").value)||0
-
-let total=fare+toll+parking+other
-
-document.getElementById("total").innerText=total
-
+function calcKM(){
+let o=parseFloat(openkm.value)||0;
+let c=parseFloat(closekm.value)||0;
+totalkm.value=(c-o>0)?c-o:0;
 }
 
-function loadMap(event){
-
-let img=document.getElementById("mapPreview")
-img.src=URL.createObjectURL(event.target.files[0])
-
+function calcTotal(){
+let total=0;
+document.querySelectorAll(".amt").forEach(e=>{
+total+=parseFloat(e.value)||0;
+});
+grand.innerText=total.toFixed(2);
 }
 
-function downloadPDF(){
+function loadMap(e){
+mapPreview.src=URL.createObjectURL(e.target.files[0]);
+}
 
-window.print()
+async function downloadPDF(){
+const { jsPDF } = window.jspdf;
+const invoice=document.getElementById("invoice");
 
+const canvas=await html2canvas(invoice,{scale:2});
+const img=canvas.toDataURL("image/png");
+
+const pdf=new jsPDF('p','mm','a4');
+const width=210;
+const height=(canvas.height*width)/canvas.width;
+
+pdf.addImage(img,'PNG',0,0,width,height);
+pdf.save("GetTaxiKovai_Invoice.pdf");
 }
 
 function shareWhatsApp(){
-
-let total=document.getElementById("total").innerText
-let customer=document.getElementById("customer").value
-
-let text="Taxi Invoice - GET TAXI KOVAI\nCustomer: "+customer+"\nTotal: ₹"+total
-
-window.open("https://wa.me/?text="+encodeURIComponent(text))
-
+let total=document.getElementById("grand").innerText;
+let text=`GET TAXI KOVAI Invoice\nTotal Amount ₹ ${total}\nThank you for choosing us!`;
+window.open("https://wa.me/?text="+encodeURIComponent(text));
 }
 
 </script>
