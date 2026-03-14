@@ -3,74 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GET TAXI KOVAI - Intelligent Invoice System</title>
+    <title>GET TAXI KOVAI - Ultimate Invoice System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { 
-            --primary: #1e63b6; 
-            --soft-blue: #e3f2fd; 
-            --gray: #666; 
-            --dark: #222;
-        }
+        :root { --primary: #1e63b6; --soft: #e3f2fd; --gray: #666; --dark: #222; }
         body { background: #eef2f7; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         
-        /* Control Panel */
         .controls { width: 210mm; background: white; padding: 25px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; position: relative; }
-        .controls input, .controls select { padding: 10px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 13px; transition: 0.3s; }
-        .controls input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(30,99,182,0.1); }
-        .controls h3 { grid-column: span 4; margin: 10px 0 5px; font-size: 15px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .controls input, .controls select { padding: 10px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 13px; }
+        .controls h3 { grid-column: span 4; margin: 10px 0 5px; font-size: 14px; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         
-        /* Menu Buttons */
-        .menu-dots { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: var(--gray); }
-        .history-panel { display: none; position: absolute; top: 50px; right: 20px; width: 300px; background: white; border: 1px solid #ddd; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 8px; z-index: 100; max-height: 400px; overflow-y: auto; padding: 10px; }
+        .menu-dots { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: var(--gray); z-index: 10; }
+        .history-panel { display: none; position: absolute; top: 55px; right: 20px; width: 350px; background: white; border: 1px solid #ddd; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 10px; z-index: 100; max-height: 500px; overflow-y: auto; padding: 15px; }
         .history-item { padding: 10px; border-bottom: 1px solid #eee; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .history-item:hover { background: #f8f9fa; }
-        .history-btn { padding: 4px 8px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .h-btns { display: flex; gap: 5px; }
+        .h-btn { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
 
-        .btn-download { background: var(--primary); color: white; border: none; padding: 14px 50px; font-size: 16px; border-radius: 8px; cursor: pointer; margin-bottom: 30px; font-weight: bold; box-shadow: 0 4px 15px rgba(30,99,182,0.3); transition: 0.2s; }
-        .btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(30,99,182,0.4); }
+        .btn-download { background: var(--primary); color: white; border: none; padding: 15px 60px; font-size: 18px; border-radius: 8px; cursor: pointer; margin-bottom: 30px; font-weight: bold; box-shadow: 0 5px 15px rgba(30,99,182,0.3); }
 
-        /* PREVIEW CONTAINER - UNTOUCHED BEAUTY */
         #invoice-container { width: 210mm; }
-        .page { width: 210mm; height: 297mm; background: white; padding: 18mm; margin-bottom: 20px; box-sizing: border-box; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); overflow: hidden; }
+        .page { width: 210mm; height: 297mm; background: white; padding: 18mm; margin-bottom: 20px; box-sizing: border-box; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
 
+        /* Shared Styles */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 3px solid var(--primary); padding-bottom: 15px; }
-        .brand-box { display: flex; align-items: center; gap: 15px; }
-        .logo-img { height: 70px; width: auto; object-fit: contain; }
-        .brand-name { font-size: 28px; font-weight: 800; color: var(--primary); margin: 0; line-height: 1; }
-        .slogan { font-size: 12px; color: var(--gray); font-style: italic; margin-top: 4px; }
-
-        .hero-price { text-align: center; margin: 25px 0; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        .hero-price h1 { font-size: 50px; margin: 0; font-weight: 500; color: var(--dark); }
+        .logo-img { height: 70px; }
+        .brand-name { font-size: 28px; font-weight: 800; color: var(--primary); margin: 0; }
+        .hero-price { text-align: center; margin: 20px 0; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .hero-price h1 { font-size: 48px; margin: 0; }
 
         .main-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; }
-        .section-label { font-size: 12px; font-weight: bold; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; text-align: center; background: #f0f7ff; }
+        .section-label { font-size: 12px; font-weight: bold; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 12px; text-align: center; background: #f0f7ff; }
 
-        .map-box { width: 100%; max-width: 180px; height: 120px; margin: 0 auto 10px; border: 1px solid #ddd; overflow: hidden; border-radius: 4px; }
+        .map-box { width: 100%; max-width: 180px; height: 110px; margin: 0 auto 10px; border: 1px solid #ddd; overflow: hidden; border-radius: 4px; }
         .map-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        .km-summary-box { background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #eee; margin: 15px 0; }
+        .km-summary-box { background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 15px; }
         .km-row { display: flex; justify-content: space-around; font-size: 12px; text-align: center; }
         .km-row b { display: block; font-size: 14px; color: var(--primary); }
-
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
 
         .bill-table { width: 100%; border-collapse: collapse; font-size: 14px; }
         .bill-table td { padding: 10px 0; color: var(--gray); }
         .bill-table td.amt { text-align: right; color: #000; font-weight: 500; }
         .grand-total { border-top: 2.5px solid var(--primary); font-weight: bold; font-size: 20px; color: var(--primary) !important; }
 
-        .timeline { margin-top: 15px; font-size: 13px; }
-        .timeline-row { display: flex; flex-direction: column; margin-bottom: 12px; padding-left: 10px; border-left: 2px solid #eee; }
-        .time-header { display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--primary); font-size: 12px; }
-        .loc-text { padding-top: 4px; color: var(--dark); }
-
-        .payment-status { text-align: center; margin-top: 35px; padding: 15px; background: var(--soft-blue); color: var(--primary); font-size: 18px; font-weight: bold; border-radius: 8px; border: 1px solid #bbdefb; }
-
+        .payment-status { text-align: center; margin-top: 30px; padding: 15px; background: var(--soft); color: var(--primary); font-size: 18px; font-weight: bold; border-radius: 8px; border: 1px solid #bbdefb; }
         .footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; padding: 15px; background: var(--primary); color: white; }
 
-        @media print { .controls, .btn-download { display: none; } .page { margin: 0; box-shadow: none; } }
+        /* Page 2 Specifics */
+        .tax-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; padding: 15px; border: 1px solid #eee; font-size: 13px; line-height: 1.6; }
+        
+        @media print { .controls, .btn-download { display: none; } }
     </style>
 </head>
 <body>
@@ -78,291 +61,240 @@
     <div class="controls">
         <div class="menu-dots" onclick="toggleHistory()">⋮</div>
         <div class="history-panel" id="historyPanel">
-            <h4 style="margin-top:0;">Bill History</h4>
-            <div id="historyList">No saved bills yet.</div>
+            <h4 style="margin-top:0;">Saved Data & Bills</h4>
+            <div id="historyList">No history.</div>
         </div>
 
-        <h3>Saved Customers</h3>
-        <select id="custSelector" onchange="selectCustomer(this.value)" style="grid-column: span 4; background: #f0f7ff; font-weight: bold;">
-            <option value="">-- Choose Existing Customer --</option>
-        </select>
+        <h3>1. Select Saved Profile</h3>
+        <select id="selCust" onchange="applyData('cust', this.value)"><option value="">Saved Customer</option></select>
+        <select id="selDriver" onchange="applyData('driver', this.value)"><option value="">Saved Driver</option></select>
+        <select id="selVehicle" onchange="applyData('vehicle', this.value)"><option value="">Saved Vehicle</option></select>
+        <div style="font-size:10px; color:var(--gray); padding:5px;">Data saves automatically when you download.</div>
 
-        <h3>Trip & Customer Details</h3>
+        <h3>2. Trip & Customer</h3>
         <input type="text" id="in_cust" placeholder="Customer Name" oninput="update()">
-        <input type="text" id="in_mobile" placeholder="Customer Mobile" oninput="update()">
-        <input type="datetime-local" id="in_pTime" oninput="update()">
+        <input type="text" id="in_mobile" placeholder="Mobile Number" oninput="update()">
         <input type="text" id="in_pLoc" placeholder="Pickup Address" oninput="update()">
-        <input type="datetime-local" id="in_dTime" oninput="update()">
         <input type="text" id="in_dLoc" placeholder="Drop Address" oninput="update()">
+        <input type="datetime-local" id="in_pTime" oninput="update()">
+        <input type="datetime-local" id="in_dTime" oninput="update()">
 
-        <h3>Driver & Vehicle</h3>
+        <h3>3. Vehicle Details</h3>
         <input type="text" id="in_driver" placeholder="Driver Name" oninput="update()">
-        <input type="text" id="in_vModel" placeholder="Vehicle Model" oninput="update()">
-        <input type="text" id="in_vNum" placeholder="Vehicle No" oninput="update()">
+        <input type="text" id="in_vModel" placeholder="Model (Sedan/SUV)" oninput="update()">
+        <input type="text" id="in_vNum" placeholder="Reg No (TN99...)" oninput="update()">
         <input type="file" onchange="loadMap(event)">
 
-        <h3>KM Readings</h3>
+        <h3>4. KM & Charges</h3>
         <input type="number" id="in_okm" placeholder="Opening KM" oninput="update()">
         <input type="number" id="in_ckm" placeholder="Closing KM" oninput="update()">
-        
-        <h3>Charges (₹)</h3>
-        <input type="number" id="in_fare" placeholder="Trip Fare" oninput="update()">
-        <input type="number" id="in_toll" placeholder="Toll/Conv. Fee" oninput="update()">
-        <input type="number" id="in_park" placeholder="Parking Fee" oninput="update()">
-        <input type="number" id="in_air" placeholder="Airport Charges" oninput="update()">
+        <input type="number" id="in_fare" placeholder="Fare" oninput="update()">
+        <input type="number" id="in_toll" placeholder="Toll" oninput="update()">
+        <input type="number" id="in_park" placeholder="Parking" oninput="update()">
+        <input type="number" id="in_air" placeholder="Airport" oninput="update()">
     </div>
 
-    <button class="btn-download" onclick="downloadPDF()">Download & Save Bill</button>
+    <button class="btn-download" onclick="downloadPDF()">Download Final Invoice</button>
 
     <div id="invoice-container">
         <div class="page" id="page1">
             <div class="header">
-                <div class="brand-box">
+                <div style="display:flex; align-items:center; gap:15px;">
                     <img src="logo.png" class="logo-img" alt="Logo">
-                    <div>
-                        <div class="brand-name">GET TAXI KOVAI</div>
-                        <div class="slogan">Redefining Comfort, Every Mile.</div>
-                    </div>
+                    <div><div class="brand-name">GET TAXI KOVAI</div><div style="font-size:11px; color:var(--gray); font-style:italic;">Redefining Comfort, Every Mile.</div></div>
                 </div>
             </div>
-
             <div class="hero-price">
                 <h1>₹ <span class="out_total">0</span></h1>
-                <p>Thanks for travelling with us, <span id="out_cust1">Customer</span></p>
+                <p>Thanks for travelling with us, <strong id="out_cust1">Customer</strong></p>
                 <div style="font-size:13px; color:#666;" id="out_mobile1"></div>
             </div>
-
             <div class="main-grid">
                 <div class="left-col">
                     <div class="section-label">Ride Details</div>
                     <div class="map-box"><img id="mapPreview" src="https://via.placeholder.com/180x120?text=Map"></div>
-                    <div style="text-align:center; font-size:14px; margin-bottom:10px;">Driver: <strong id="out_driver1">Name</strong></div>
-                    
-                    <div class="km-summary-box">
-                        <div class="km-row">
-                            <div>Opening<b id="out_okm1">0</b></div>
-                            <div style="border-left:1px solid #ddd; border-right:1px solid #ddd; padding:0 15px;">Closing<b id="out_ckm1">0</b></div>
-                            <div>Total KM<b id="out_tkm" style="color:#d32f2f;">0</b></div>
-                        </div>
-                    </div>
-
-                    <div class="stat-grid">
-                        <div>Vehicle: <strong id="out_vModel1">Sedan</strong></div>
-                        <div>Reg No: <strong id="out_vNum1">TN 00 XX 0000</strong></div>
-                    </div>
-                    
-                    <div class="timeline">
-                        <div class="timeline-row">
-                            <div class="time-header">START: <span id="out_pTime1">--</span></div>
-                            <div class="loc-text" id="out_pLoc1">Pickup Address</div>
-                        </div>
-                        <div class="timeline-row" style="border-left-color: #ffcc00;">
-                            <div class="time-header" style="color:#e65100;">END: <span id="out_dTime1">--</span></div>
-                            <div class="loc-text" id="out_dLoc1">Drop Address</div>
-                        </div>
+                    <div class="km-summary-box"><div class="km-row"><div>Opening<b id="out_okm1">0</b></div><div>Closing<b id="out_ckm1">0</b></div><div>Total KM<b id="out_tkm" style="color:#d32f2f;">0</b></div></div></div>
+                    <div style="font-size:13px; margin-bottom:10px;">Driver: <strong id="out_driver1">Name</strong></div>
+                    <div style="font-size:12px; color:var(--gray);">Vehicle: <b id="out_vModel1">Sedan</b> | <b id="out_vNum1">--</b></div>
+                    <div style="margin-top:15px; font-size:12px; border-left:2px solid #eee; padding-left:10px;">
+                        <div style="margin-bottom:8px;"><b>START:</b> <span id="out_pTime1">--</span><br><small id="out_pLoc1"></small></div>
+                        <div><b>END:</b> <span id="out_dTime1">--</span><br><small id="out_dLoc1"></small></div>
                     </div>
                 </div>
-
                 <div class="right-col">
                     <div class="section-label">Bill Details</div>
                     <table class="bill-table">
-                        <tr><td>Your Trip Fare</td><td class="amt">₹ <span id="out_fare1">0.00</span></td></tr>
-                        <tr><td>Toll Convenience fee</td><td class="amt">₹ <span id="out_toll1">0.00</span></td></tr>
-                        <tr><td>Parking Charges</td><td class="amt">₹ <span id="out_park1">0.00</span></td></tr>
-                        <tr><td>Airport Charges</td><td class="amt">₹ <span id="out_air1">0.00</span></td></tr>
-                        <tr class="grand-total">
-                            <td>Total Bill</td>
-                            <td class="amt">₹ <span class="out_total">0</span></td>
-                        </tr>
+                        <tr><td>Trip Fare</td><td class="amt">₹ <span id="out_fare1">0.00</span></td></tr>
+                        <tr><td>Toll Fee</td><td class="amt">₹ <span id="out_toll1">0.00</span></td></tr>
+                        <tr><td>Parking</td><td class="amt">₹ <span id="out_park1">0.00</span></td></tr>
+                        <tr><td>Airport</td><td class="amt">₹ <span id="out_air1">0.00</span></td></tr>
+                        <tr class="grand-total"><td>Total Bill</td><td class="amt">₹ <span class="out_total">0</span></td></tr>
                     </table>
-                    <div style="margin-top:20px; font-size:11px; color:#888; line-height:1.5;">
-                        <p style="background:#fff3cd; color:#856404; padding:8px; border-radius:4px;">We've fulfilled our promise to take you to destination for pre-agreed Total Fare.</p>
-                        Includes 0.00 Taxes
-                    </div>
                 </div>
             </div>
-
-            <div class="payment-status">
-                Paid by UPI: ₹ <span class="out_total">0</span>
-            </div>
-
-            <div class="footer">
-                <strong>GET TAXI KOVAI</strong> | No 286, D.B.Road, RS Puram, Coimbatore – 641002 <br>
-                📧 bookings@gettaxikovai.in | 🌐 www.GetTaxiKovai.in | 📞 +91 90437 43777
-            </div>
+            <div class="payment-status">Paid by UPI: ₹ <span class="out_total">0</span></div>
+            <div class="footer"><strong>GET TAXI KOVAI</strong> | No 286, D.B.Road, Coimbatore - 641002 | 📞 +91 90437 43777</div>
         </div>
 
         <div class="page" id="page2">
-            <div style="text-align:center; font-size:12px; margin-bottom:5px; color:var(--gray);">Original Tax Invoice</div>
+            <div style="text-align:center; font-size:11px; color:#888;">Original Tax Invoice</div>
             <h2 style="border-bottom:3px solid var(--primary); padding-bottom:10px; color:var(--primary);">Driver Trip Invoice</h2>
             
-            <div style="display:flex; justify-content:space-between; margin:20px 0; font-size:14px;">
+            <div class="tax-info-grid">
                 <div>
-                    <strong id="out_driver2">Driver Name</strong><br>
-                    <span id="out_vNum2">Vehicle Number</span><br>
-                    <span id="out_vModel2">Vehicle Model</span>
+                    <b>SERVICE PROVIDER</b><br>
+                    <strong>Basheer Ahamed</strong><br>
+                    Vehicle: <span id="out_vModel2">--</span><br>
+                    Reg No: <span id="out_vNum2">--</span><br>
+                    Category: Renting of Cab
                 </div>
                 <div style="text-align:right;">
-                    Customer: <strong id="out_cust2">Name</strong><br>
-                    Mobile: <span id="out_mobile2">--</span>
+                    <b>CUSTOMER DETAILS</b><br>
+                    <strong id="out_cust2">Customer</strong><br>
+                    Mobile: <span id="out_mobile2">--</span><br>
+                    Pickup: <span id="out_pLoc2">--</span>
                 </div>
             </div>
 
-            <table style="width:100%; border-collapse:collapse; margin-top:30px;">
-                <tr style="border-bottom:2px solid var(--dark); font-weight:bold; background:#f4f4f4;">
-                    <td style="padding:12px;">Description</td><td style="text-align:right; padding:12px;">Amount (₹)</td>
+            <div style="padding:15px; border:1px solid #eee; margin-bottom:20px; font-size:13px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span><b>Trip Distance:</b> <span id="out_tkm2">0</span> Km</span>
+                    <span><b>Duration:</b> <span id="out_pTime2">--</span> to <span id="out_dTime2">--</span></span>
+                </div>
+            </div>
+
+            <table style="width:100%; border-collapse:collapse;">
+                <tr style="background:#f4f4f4; font-weight:bold; border-bottom:2px solid #222;">
+                    <td style="padding:12px;">Fare Description</td><td style="text-align:right; padding:12px;">Amount (₹)</td>
                 </tr>
                 <tr><td style="padding:12px; border-bottom:1px solid #eee;">Ride Fee</td><td style="text-align:right;" id="out_fare2">0.00</td></tr>
                 <tr><td style="padding:12px; border-bottom:1px solid #eee;">Toll & Convenience Fee</td><td style="text-align:right;" id="out_toll2">0.00</td></tr>
                 <tr><td style="padding:12px; border-bottom:1px solid #eee;">Parking Charges</td><td style="text-align:right;" id="out_park2">0.00</td></tr>
                 <tr><td style="padding:12px; border-bottom:1px solid #eee;">Airport Charges</td><td style="text-align:right;" id="out_air2">0.00</td></tr>
-                <tr style="font-weight:bold; font-size:24px; color:var(--primary);">
-                    <td style="padding:12px;">Total Fare</td><td style="text-align:right;">₹ <span class="out_total">0</span></td>
+                <tr style="font-weight:bold; font-size:22px; color:var(--primary);">
+                    <td style="padding:12px;">Total Bill Amount</td><td style="text-align:right;">₹ <span class="out_total">0</span></td>
                 </tr>
             </table>
             
-            <div style="margin-top:50px; font-size:11px; color:#777; border-left:4px solid var(--primary); padding-left:15px;">
-                1. This invoice is issued on behalf of Transport Service Provider.<br>
-                2. This is an electronically generated invoice and does not require a digital signature.
+            <div style="margin-top:40px; font-size:11px; color:#777; line-height:1.6;">
+                1. This invoice is issued on behalf of the Transport Service Provider.<br>
+                2. This is an electronically generated document and does not require a physical signature.<br>
+                3. Issued by GET TAXI KOVAI, Coimbatore.
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATA PERSISTENCE LOGIC ---
-        let customers = JSON.parse(localStorage.getItem('gtk_customers')) || [];
-        let bills = JSON.parse(localStorage.getItem('gtk_bills')) || [];
+        // Storage Keys
+        const KEYS = { cust: 'gtk_c', drv: 'gtk_d', veh: 'gtk_v', bills: 'gtk_b' };
+        let db = { 
+            cust: JSON.parse(localStorage.getItem(KEYS.cust)) || [],
+            drv: JSON.parse(localStorage.getItem(KEYS.drv)) || [],
+            veh: JSON.parse(localStorage.getItem(KEYS.veh)) || [],
+            bills: JSON.parse(localStorage.getItem(KEYS.bills)) || []
+        };
 
         function update() {
-            const fare = parseFloat(document.getElementById('in_fare').value) || 0;
-            const toll = parseFloat(document.getElementById('in_toll').value) || 0;
-            const park = parseFloat(document.getElementById('in_park').value) || 0;
-            const air = parseFloat(document.getElementById('in_air').value) || 0;
+            const f = parseFloat(document.getElementById('in_fare').value) || 0;
+            const t = parseFloat(document.getElementById('in_toll').value) || 0;
+            const p = parseFloat(document.getElementById('in_park').value) || 0;
+            const a = parseFloat(document.getElementById('in_air').value) || 0;
             const okm = parseFloat(document.getElementById('in_okm').value) || 0;
             const ckm = parseFloat(document.getElementById('in_ckm').value) || 0;
+            const total = (f+t+p+a).toFixed(0);
+            const km = (ckm > okm) ? (ckm - okm) : 0;
+
+            const fields = {
+                'out_cust1': 'in_cust', 'out_cust2': 'in_cust', 'out_mobile1': 'in_mobile', 'out_mobile2': 'in_mobile',
+                'out_driver1': 'in_driver', 'out_vModel1': 'in_vModel', 'out_vModel2': 'in_vModel',
+                'out_vNum1': 'in_vNum', 'out_vNum2': 'in_vNum', 'out_pLoc1': 'in_pLoc', 'out_pLoc2': 'in_pLoc', 'out_dLoc1': 'in_dLoc'
+            };
+            for(let id in fields) document.getElementById(id).innerText = document.getElementById(fields[id]).value;
+
+            document.getElementById('out_tkm').innerText = km;
+            document.getElementById('out_tkm2').innerText = km;
+            document.getElementById('out_fare1').innerText = f.toFixed(2); document.getElementById('out_fare2').innerText = f.toFixed(2);
+            document.getElementById('out_toll1').innerText = t.toFixed(2); document.getElementById('out_toll2').innerText = t.toFixed(2);
+            document.getElementById('out_park1').innerText = p.toFixed(2); document.getElementById('out_park2').innerText = p.toFixed(2);
+            document.getElementById('out_air1').innerText = a.toFixed(2); document.getElementById('out_air2').innerText = a.toFixed(2);
+            document.getElementById('out_okm1').innerText = okm; document.getElementById('out_ckm1').innerText = ckm;
             
-            const total = (fare + toll + park + air).toFixed(0);
-            const totalKM = (ckm > okm) ? (ckm - okm) : 0;
-
-            document.getElementById('out_cust1').innerText = document.getElementById('in_cust').value || "Customer";
-            document.getElementById('out_cust2').innerText = document.getElementById('in_cust').value || "Customer";
-            document.getElementById('out_mobile1').innerText = document.getElementById('in_mobile').value;
-            document.getElementById('out_mobile2').innerText = document.getElementById('in_mobile').value;
-            document.getElementById('out_driver1').innerText = document.getElementById('in_driver').value || "Name";
-            document.getElementById('out_vModel1').innerText = document.getElementById('in_vModel').value || "Sedan";
-            document.getElementById('out_vNum1').innerText = document.getElementById('in_vNum').value || "TN 00 XX 0000";
-            document.getElementById('out_tkm').innerText = totalKM;
-            document.getElementById('out_pLoc1').innerText = document.getElementById('in_pLoc').value || "Pickup Address";
-            document.getElementById('out_dLoc1').innerText = document.getElementById('in_dLoc').value || "Drop Address";
-            
-            const pTime = document.getElementById('in_pTime').value;
-            const dTime = document.getElementById('in_dTime').value;
-            document.getElementById('out_pTime1').innerText = pTime ? pTime.replace('T', ' ') : "--";
-            document.getElementById('out_dTime1').innerText = dTime ? dTime.replace('T', ' ') : "--";
-
-            document.getElementById('out_fare1').innerText = fare.toFixed(2);
-            document.getElementById('out_toll1').innerText = toll.toFixed(2);
-            document.getElementById('out_park1').innerText = park.toFixed(2);
-            document.getElementById('out_air1').innerText = air.toFixed(2);
-            document.getElementById('out_okm1').innerText = okm;
-            document.getElementById('out_ckm1').innerText = ckm;
-
-            document.getElementById('out_driver2').innerText = document.getElementById('in_driver').value || "Driver Name";
-            document.getElementById('out_vNum2').innerText = document.getElementById('in_vNum').value || "Vehicle Number";
-            document.getElementById('out_vModel2').innerText = document.getElementById('in_vModel').value || "Model";
-            document.getElementById('out_fare2').innerText = fare.toFixed(2);
-            document.getElementById('out_toll2').innerText = toll.toFixed(2);
-            document.getElementById('out_park2').innerText = park.toFixed(2);
-            document.getElementById('out_air2').innerText = air.toFixed(2);
+            const pt = document.getElementById('in_pTime').value; const dt = document.getElementById('in_dTime').value;
+            document.getElementById('out_pTime1').innerText = pt.replace('T',' '); document.getElementById('out_pTime2').innerText = pt.split('T')[1] || '--';
+            document.getElementById('out_dTime1').innerText = dt.replace('T',' '); document.getElementById('out_dTime2').innerText = dt.split('T')[1] || '--';
 
             document.querySelectorAll('.out_total').forEach(el => el.innerText = total);
         }
 
         function toggleHistory() {
-            const panel = document.getElementById('historyPanel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-            renderHistory();
+            const p = document.getElementById('historyPanel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+            renderDB();
         }
 
-        function renderHistory() {
-            const list = document.getElementById('historyList');
-            const selector = document.getElementById('custSelector');
-            
-            // Render Bills
-            list.innerHTML = bills.length ? '' : 'No saved bills yet.';
-            bills.slice().reverse().forEach((bill, idx) => {
-                const item = document.createElement('div');
-                item.className = 'history-item';
-                item.innerHTML = `
-                    <div><b>${bill.cust}</b><br><small>${bill.date}</small></div>
-                    <button class="history-btn" onclick="copyBill(${bills.length - 1 - idx})">Copy</button>
-                `;
-                list.appendChild(item);
+        function renderDB() {
+            const hList = document.getElementById('historyList');
+            hList.innerHTML = db.bills.length ? '' : 'No history found.';
+            db.bills.slice(-15).reverse().forEach((b, i) => {
+                hList.innerHTML += `<div class="history-item"><div><b>${b.data.in_cust}</b><br><small>${b.ts}</small></div><div class="h-btns"><button class="h-btn" style="background:#28a745" onclick="downloadOld(${db.bills.length-1-i})">Get PDF</button><button class="h-btn" style="background:var(--primary)" onclick="copyBill(${db.bills.length-1-i})">Edit</button></div></div>`;
             });
 
-            // Render Customer Dropdown
-            selector.innerHTML = '<option value="">-- Choose Existing Customer --</option>';
-            customers.forEach((c, idx) => {
-                selector.innerHTML += `<option value="${idx}">${c.name} (${c.mobile})</option>`;
-            });
+            const fill = (id, arr) => {
+                const s = document.getElementById(id); s.innerHTML = `<option value="">Saved ${id.replace('sel','')}</option>`;
+                arr.forEach((v, idx) => s.innerHTML += `<option value="${idx}">${v.name || v.val}</option>`);
+            };
+            fill('selCust', db.cust); fill('selDriver', db.drv); fill('selVehicle', db.veh);
         }
 
-        function selectCustomer(idx) {
-            if (idx === "") return;
-            const c = customers[idx];
-            document.getElementById('in_cust').value = c.name;
-            document.getElementById('in_mobile').value = c.mobile;
-            document.getElementById('in_pLoc').value = c.addr;
+        function applyData(type, idx) {
+            if(idx === "") return;
+            const d = db[type][idx];
+            if(type==='cust') { document.getElementById('in_cust').value = d.name; document.getElementById('in_mobile').value = d.mobile; document.getElementById('in_pLoc').value = d.addr; }
+            if(type==='driver') document.getElementById('in_driver').value = d.val;
+            if(type==='vehicle') { document.getElementById('in_vModel').value = d.model; document.getElementById('in_vNum').value = d.num; }
             update();
         }
 
         function copyBill(idx) {
-            const b = bills[idx];
-            for (let key in b.data) {
-                const el = document.getElementById(key);
-                if (el) el.value = b.data[key];
-            }
-            toggleHistory();
-            update();
+            const b = db.bills[idx].data;
+            for(let k in b) if(document.getElementById(k)) document.getElementById(k).value = b[k];
+            toggleHistory(); update();
         }
 
-        function loadMap(e) {
-            const file = e.target.files[0];
-            if (file) { document.getElementById('mapPreview').src = URL.createObjectURL(file); }
+        async function downloadOld(idx) {
+            copyBill(idx); setTimeout(() => { downloadPDF(); }, 500);
         }
+
+        function loadMap(e) { if(e.target.files[0]) document.getElementById('mapPreview').src = URL.createObjectURL(e.target.files[0]); }
 
         async function downloadPDF() {
-            const custName = document.getElementById('in_cust').value;
-            const mobile = document.getElementById('in_mobile').value;
-            const addr = document.getElementById('in_pLoc').value;
+            const c = document.getElementById('in_cust').value;
+            const m = document.getElementById('in_mobile').value;
+            const d = document.getElementById('in_driver').value;
+            const vm = document.getElementById('in_vModel').value;
+            const vn = document.getElementById('in_vNum').value;
 
-            if (!custName) { alert("Please enter Customer Name"); return; }
-
-            // Save Customer if new
-            if (!customers.find(c => c.mobile === mobile)) {
-                customers.push({ name: custName, mobile: mobile, addr: addr });
-                localStorage.setItem('gtk_customers', JSON.stringify(customers));
-            }
-
-            // Save Bill to History
-            const formData = {};
-            document.querySelectorAll('.controls input').forEach(i => formData[i.id] = i.value);
-            bills.push({ cust: custName, date: new Date().toLocaleString(), data: formData });
-            localStorage.setItem('gtk_bills', JSON.stringify(bills));
+            if(!db.cust.find(x => x.mobile === m)) db.cust.push({name:c, mobile:m, addr: document.getElementById('in_pLoc').value});
+            if(!db.drv.find(x => x.val === d)) db.drv.push({val:d});
+            if(!db.veh.find(x => x.num === vn)) db.veh.push({model:vm, num:vn});
+            
+            const fd = {}; document.querySelectorAll('.controls input').forEach(i => fd[i.id] = i.value);
+            db.bills.push({ts: new Date().toLocaleString(), data: fd});
+            
+            for(let k in db) localStorage.setItem(KEYS[k], JSON.stringify(db[k]));
 
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const canvas1 = await html2canvas(document.getElementById("page1"), { scale: 3, useCORS: true });
-            pdf.addImage(canvas1.toDataURL("image/png"), 'PNG', 0, 0, 210, 297);
+            const opt = { scale: 2, useCORS: true }; // Scale 2 for smaller 4-5MB files
+            const c1 = await html2canvas(document.getElementById("page1"), opt);
+            pdf.addImage(c1.toDataURL("image/jpeg", 0.8), 'JPEG', 0, 0, 210, 297);
             pdf.addPage();
-            const canvas2 = await html2canvas(document.getElementById("page2"), { scale: 3, useCORS: true });
-            pdf.addImage(canvas2.toDataURL("image/png"), 'PNG', 0, 0, 210, 297);
-            pdf.save(`GTK_${custName.replace(/\s+/g, '_')}_Invoice.pdf`);
-            renderHistory();
+            const c2 = await html2canvas(document.getElementById("page2"), opt);
+            pdf.addImage(c2.toDataURL("image/jpeg", 0.8), 'JPEG', 0, 0, 210, 297);
+            pdf.save(`GTK_${c.replace(/\s/g,'_')}.pdf`);
+            renderDB();
         }
-
-        // Initial Load
-        renderHistory();
+        renderDB();
     </script>
 </body>
 </html>
