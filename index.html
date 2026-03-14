@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GET TAXI KOVAI - Official Invoice</title>
+    <title>GET TAXI KOVAI - Official Invoice System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --primary: #1e63b6; --soft: #e3f2fd; --gray: #666; --dark: #222; }
         body { background: #eef2f7; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         
-        /* Control Panel */
         .controls { width: 210mm; background: white; padding: 25px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; position: relative; }
         .controls input, .controls select { padding: 10px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 13px; }
         .controls h3 { grid-column: span 4; margin: 10px 0 5px; font-size: 14px; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; }
@@ -18,27 +17,27 @@
         .menu-dots { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: var(--gray); z-index: 10; }
         .history-panel { display: none; position: absolute; top: 55px; right: 20px; width: 350px; background: white; border: 1px solid #ddd; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 10px; z-index: 100; max-height: 500px; overflow-y: auto; padding: 15px; }
         .history-item { padding: 10px; border-bottom: 1px solid #eee; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .h-btns { display: flex; gap: 5px; }
+        .h-btn { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; color: white; }
 
         .btn-download { background: var(--primary); color: white; border: none; padding: 15px 60px; font-size: 18px; border-radius: 8px; cursor: pointer; margin-bottom: 30px; font-weight: bold; }
 
-        /* Preview Area */
         #invoice-container { width: 210mm; }
-        .page { width: 210mm; height: 297mm; background: white; padding: 18mm; margin-bottom: 20px; box-sizing: border-box; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); overflow: hidden; }
+        .page { width: 210mm; height: 297mm; background: white; padding: 18mm; margin-bottom: 20px; box-sizing: border-box; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
 
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 3px solid var(--primary); padding-bottom: 15px; }
         .logo-img { height: 70px; }
         .brand-name { font-size: 28px; font-weight: 800; color: var(--primary); margin: 0; }
-        
-        .hero-price { text-align: center; margin: 25px 0; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        .hero-price h1 { font-size: 50px; margin: 0; color: var(--dark); }
+        .hero-price { text-align: center; margin: 20px 0; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .hero-price h1 { font-size: 48px; margin: 0; }
 
         .main-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; }
-        .section-label { font-size: 12px; font-weight: bold; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; text-align: center; background: #f0f7ff; }
+        .section-label { font-size: 12px; font-weight: bold; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 12px; text-align: center; background: #f0f7ff; }
 
-        .map-box { width: 100%; max-width: 180px; height: 120px; margin: 0 auto 10px; border: 1px solid #ddd; overflow: hidden; border-radius: 4px; }
+        .map-box { width: 100%; max-width: 180px; height: 110px; margin: 0 auto 10px; border: 1px solid #ddd; overflow: hidden; border-radius: 4px; }
         .map-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        .km-summary-box { background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #eee; margin: 15px 0; }
+        .km-summary-box { background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 15px; }
         .km-row { display: flex; justify-content: space-around; font-size: 12px; text-align: center; }
         .km-row b { display: block; font-size: 14px; color: var(--primary); }
 
@@ -47,9 +46,14 @@
         .bill-table td.amt { text-align: right; color: #000; font-weight: 500; }
         .grand-total { border-top: 2.5px solid var(--primary); font-weight: bold; font-size: 20px; color: var(--primary) !important; }
 
-        .payment-status { text-align: center; margin-top: 35px; padding: 15px; background: var(--soft); color: var(--primary); font-size: 18px; font-weight: bold; border-radius: 8px; border: 1px solid #bbdefb; }
+        .payment-status { text-align: center; margin-top: 30px; padding: 15px; background: var(--soft); color: var(--primary); font-size: 18px; font-weight: bold; border-radius: 8px; border: 1px solid #bbdefb; }
         .footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; padding: 15px; background: var(--primary); color: white; }
 
+        /* Page 2 - Strict Layout */
+        .page2-header { display: flex; justify-content: space-between; border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+        .page2-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #ccc; font-size: 12px; margin-bottom: 20px; }
+        .p2-cell { padding: 10px; border: 0.5px solid #eee; }
+        
         @media print { .controls, .btn-download { display: none; } }
     </style>
 </head>
@@ -57,15 +61,15 @@
 
     <div class="controls">
         <div class="menu-dots" onclick="toggleHistory()">⋮</div>
-        <div class="history-panel" id="historyPanel"><h4 style="margin:0;">Bill History</h4><div id="historyList">No history.</div></div>
+        <div class="history-panel" id="historyPanel"><h4 style="margin:0;">Billed List & History</h4><div id="historyList">No bills.</div></div>
 
-        <h3>1. Select Saved Profile</h3>
-        <select id="selCust" onchange="apply('cust', this.value)"><option value="">Select Customer</option></select>
-        <select id="selDriver" onchange="apply('drv', this.value)"><option value="">Select Driver</option></select>
-        <select id="selVeh" onchange="apply('veh', this.value)"><option value="">Select Vehicle</option></select>
+        <h3>1. Quick Selection</h3>
+        <select id="selCust" onchange="applyData('cust', this.value)"><option value="">Saved Customer</option></select>
+        <select id="selDriver" onchange="applyData('drv', this.value)"><option value="">Saved Driver</option></select>
+        <select id="selVeh" onchange="applyData('veh', this.value)"><option value="">Saved Vehicle</option></select>
         <div></div>
 
-        <h3>2. Trip & Customer</h3>
+        <h3>2. Customer & Trip</h3>
         <input type="text" id="in_cust" placeholder="Customer Name" oninput="update()">
         <input type="text" id="in_mobile" placeholder="Mobile Number" oninput="update()">
         <input type="text" id="in_pLoc" placeholder="Pickup Address" oninput="update()">
@@ -75,8 +79,8 @@
 
         <h3>3. Driver & Vehicle</h3>
         <input type="text" id="in_driver" placeholder="Driver Name" oninput="update()">
-        <input type="text" id="in_vModel" placeholder="Model (Sedan/SUV)" oninput="update()">
-        <input type="text" id="in_vNum" placeholder="Vehicle No" oninput="update()">
+        <input type="text" id="in_vModel" placeholder="Vehicle Model" oninput="update()">
+        <input type="text" id="in_vNum" placeholder="Vehicle Number" oninput="update()">
         <input type="file" onchange="loadMap(event)">
 
         <h3>4. KM & Charges</h3>
@@ -95,7 +99,7 @@
             <div class="header">
                 <div style="display:flex; align-items:center; gap:15px;">
                     <img src="logo.png" class="logo-img" alt="Logo">
-                    <div><div class="brand-name">GET TAXI KOVAI</div><div style="font-size:12px; color:var(--gray); font-style:italic;">Redefining Comfort, Every Mile.</div></div>
+                    <div><div class="brand-name">GET TAXI KOVAI</div><div style="font-size:11px; color:var(--gray); font-style:italic;">Redefining Comfort, Every Mile.</div></div>
                 </div>
             </div>
             <div class="hero-price">
@@ -107,12 +111,12 @@
                 <div class="left-col">
                     <div class="section-label">Ride Details</div>
                     <div class="map-box"><img id="mapPreview" src="https://via.placeholder.com/180x120?text=Map"></div>
-                    <div style="text-align:center; font-size:14px; margin-bottom:10px;">Driver: <strong id="out_driver1">Name</strong></div>
                     <div class="km-summary-box"><div class="km-row"><div>Opening<b id="out_okm1">0</b></div><div>Closing<b id="out_ckm1">0</b></div><div>Total KM<b id="out_tkm" style="color:#d32f2f;">0</b></div></div></div>
-                    <div style="font-size:13px; margin-top:10px;">Vehicle: <b id="out_vModel1">Sedan</b> | <b id="out_vNum1">--</b></div>
-                    <div style="margin-top:15px; font-size:12px; border-left:2px solid #eee; padding-left:10px;">
-                        <div style="margin-bottom:8px;"><b>START:</b> <span id="out_pTime1">--</span><br><small id="out_pLoc1"></small></div>
-                        <div><b>END:</b> <span id="out_dTime1">--</span><br><small id="out_dLoc1"></small></div>
+                    <div style="font-size:13px; margin-bottom:10px;">Driver: <strong id="out_driver1">Name</strong></div>
+                    <div style="font-size:12px; color:var(--gray);">Vehicle: <b id="out_vModel1">Sedan</b> | <b id="out_vNum1">--</b></div>
+                    <div style="margin-top:10px; font-size:12px; border-left:2px solid #eee; padding-left:10px;">
+                        <div style="margin-bottom:5px;"><b>START:</b> <span id="out_pTime1">--</span></div>
+                        <div><b>END:</b> <span id="out_dTime1">--</span></div>
                     </div>
                 </div>
                 <div class="right-col">
@@ -131,96 +135,127 @@
         </div>
 
         <div class="page" id="page2">
-            <div style="text-align:center; font-size:11px; color:#888;">Original Tax Invoice</div>
-            <h2 style="border-bottom:3px solid var(--primary); padding-bottom:10px; color:var(--primary);">Driver Trip Invoice</h2>
-            <div style="display:flex; justify-content:space-between; margin:20px 0; font-size:13px; border:1px solid #eee; padding:15px;">
-                <div><b>SERVICE PROVIDER</b><br><strong>Basheer Ahamed</strong><br>Vehicle: <span id="out_vModel2">--</span><br>Reg No: <span id="out_vNum2">--</span></div>
-                <div style="text-align:right;"><b>CUSTOMER</b><br><strong id="out_cust2">Customer</strong><br>Mobile: <span id="out_mobile2">--</span><br>Pickup: <span id="out_pLoc2">--</span></div>
+            <div style="text-align:center; font-size:10px; margin-bottom:5px;">Original Tax Invoice</div>
+            <h1 style="margin:0; font-size:32px;">Driver Trip Invoice</h1>
+            
+            <div style="display:flex; justify-content:space-between; margin:15px 0; font-size:13px;">
+                <div>
+                    <strong>Basheer Ahamed</strong><br>
+                    <span id="out_vModel2">Sedan</span><br>
+                    <span id="out_vNum2">TN99</span>
+                </div>
+                <div style="text-align:right;">Service Tax Category: <b>Renting of Cab</b></div>
             </div>
-            <table style="width:100%; border-collapse:collapse; font-size:14px;">
-                <tr style="background:#f4f4f4; border-bottom:2px solid #222;">
-                    <td style="padding:12px;">Fare Description</td><td style="text-align:right; padding:12px;">Amount (₹)</td>
+
+            <div class="page2-grid">
+                <div class="p2-cell">Invoice ID: <b id="out_invID">GTK-1000</b></div>
+                <div class="p2-cell" style="text-align:right;">Invoice Date: <b id="out_invDate">--</b></div>
+                <div class="p2-cell" style="grid-column: span 2;">Customer Name: <b id="out_cust2">--</b> | Mobile: <b id="out_mobile2">--</b></div>
+                <div class="p2-cell" style="grid-column: span 2;">Pickup Address: <span id="out_pLoc2">--</span></div>
+            </div>
+
+            <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                <tr style="border-bottom:1px solid #000; font-weight:bold;">
+                    <td style="padding:10px;">Description</td><td style="text-align:right; padding:10px;">Amount (₹)</td>
                 </tr>
-                <tr><td style="padding:12px; border-bottom:1px solid #eee;">Ride Fee</td><td style="text-align:right;" id="out_fare2">0.00</td></tr>
-                <tr><td style="padding:12px; border-bottom:1px solid #eee;">Toll & Convenience Fee</td><td style="text-align:right;" id="out_toll2">0.00</td></tr>
-                <tr><td style="padding:12px; border-bottom:1px solid #eee;">Parking Charges</td><td style="text-align:right;" id="out_park2">0.00</td></tr>
-                <tr><td style="padding:12px; border-bottom:1px solid #eee;">Airport Charges</td><td style="text-align:right;" id="out_air2">0.00</td></tr>
-                <tr style="font-weight:bold; font-size:24px; color:var(--primary);"><td style="padding:12px;">Total Fare</td><td style="text-align:right;">₹ <span class="out_total">0</span></td></tr>
+                <tr><td style="padding:10px; border-bottom:1px solid #eee;">Ride Fee</td><td style="text-align:right;" id="out_fare2">0.00</td></tr>
+                <tr><td style="padding:10px; border-bottom:1px solid #eee;">Toll Convenience fee</td><td style="text-align:right;" id="out_toll2">0.00</td></tr>
+                <tr><td style="padding:10px; border-bottom:1px solid #eee;">Airport Charges</td><td style="text-align:right;" id="out_air2">0.00</td></tr>
+                <tr><td style="padding:10px; border-bottom:1px solid #eee;">Parking Charges</td><td style="text-align:right;" id="out_park2">0.00</td></tr>
+                <tr><td style="padding:10px;">CGST (0%)</td><td style="text-align:right;">0.00</td></tr>
+                <tr><td style="padding:10px; border-bottom:1px solid #eee;">SGST (0%)</td><td style="text-align:right;">0.00</td></tr>
+                <tr style="font-weight:bold; font-size:18px;">
+                    <td style="padding:10px;">Total Customer Ride Fare</td>
+                    <td style="text-align:right;">₹ <span class="out_total">0</span></td>
+                </tr>
             </table>
-            <div style="margin-top:50px; font-size:11px; color:#777; border-left:4px solid var(--primary); padding-left:15px;">1. This invoice is issued on behalf of Transport Service Provider. 2. Electronic document, no signature needed.</div>
+
+            <div style="position:absolute; bottom:20mm; font-size:10px; color:#777;">
+                Please note: 1. This invoice is issued on behalf of Transport Service Provider. 2. This is an electronically generated document.
+            </div>
         </div>
     </div>
 
     <script>
-        let db = { cust: JSON.parse(localStorage.getItem('g_c')) || [], drv: JSON.parse(localStorage.getItem('g_d')) || [], veh: JSON.parse(localStorage.getItem('g_v')) || [], bills: JSON.parse(localStorage.getItem('g_b')) || [] };
+        const STORE = { c: 'gtk_c', d: 'gtk_d', v: 'gtk_v', b: 'gtk_b' };
+        let db = { 
+            c: JSON.parse(localStorage.getItem(STORE.c)) || [], 
+            d: JSON.parse(localStorage.getItem(STORE.d)) || [], 
+            v: JSON.parse(localStorage.getItem(STORE.v)) || [], 
+            b: JSON.parse(localStorage.getItem(STORE.b)) || [] 
+        };
 
         function update() {
-            const fare = parseFloat(document.getElementById('in_fare').value) || 0;
-            const toll = parseFloat(document.getElementById('in_toll').value) || 0;
-            const park = parseFloat(document.getElementById('in_park').value) || 0;
-            const air = parseFloat(document.getElementById('in_air').value) || 0;
+            const f = parseFloat(document.getElementById('in_fare').value) || 0;
+            const t = parseFloat(document.getElementById('in_toll').value) || 0;
+            const p = parseFloat(document.getElementById('in_park').value) || 0;
+            const a = parseFloat(document.getElementById('in_air').value) || 0;
             const okm = parseFloat(document.getElementById('in_okm').value) || 0;
             const ckm = parseFloat(document.getElementById('in_ckm').value) || 0;
-            const total = (fare + toll + park + air).toFixed(0);
+            const total = (f+t+p+a).toFixed(0);
             const km = (ckm > okm) ? (ckm - okm) : 0;
 
-            const sync = (outId, inId) => { document.getElementById(outId).innerText = document.getElementById(inId).value || '--'; };
-            sync('out_cust1','in_cust'); sync('out_cust2','in_cust'); sync('out_mobile1','in_mobile'); sync('out_mobile2','in_mobile');
-            sync('out_driver1','in_driver'); sync('out_vModel1','in_vModel'); sync('out_vModel2','in_vModel');
-            sync('out_vNum1','in_vNum'); sync('out_vNum2','in_vNum'); sync('out_pLoc1','in_pLoc'); sync('out_pLoc2','in_pLoc'); sync('out_dLoc1','in_dLoc');
+            const map = { 'out_cust1': 'in_cust', 'out_cust2': 'in_cust', 'out_mobile1': 'in_mobile', 'out_mobile2': 'in_mobile', 'out_driver1': 'in_driver', 'out_vModel1': 'in_vModel', 'out_vModel2': 'in_vModel', 'out_vNum1': 'in_vNum', 'out_vNum2': 'in_vNum', 'out_pLoc1': 'in_pLoc', 'out_pLoc2': 'in_pLoc' };
+            for(let out in map) document.getElementById(out).innerText = document.getElementById(map[out]).value || '--';
 
             document.getElementById('out_tkm').innerText = km;
-            document.getElementById('out_fare1').innerText = fare.toFixed(2); document.getElementById('out_fare2').innerText = fare.toFixed(2);
-            document.getElementById('out_toll1').innerText = toll.toFixed(2); document.getElementById('out_toll2').innerText = toll.toFixed(2);
-            document.getElementById('out_park1').innerText = park.toFixed(2); document.getElementById('out_park2').innerText = park.toFixed(2);
-            document.getElementById('out_air1').innerText = air.toFixed(2); document.getElementById('out_air2').innerText = air.toFixed(2);
+            document.getElementById('out_fare1').innerText = f.toFixed(2); document.getElementById('out_fare2').innerText = f.toFixed(2);
+            document.getElementById('out_toll1').innerText = t.toFixed(2); document.getElementById('out_toll2').innerText = t.toFixed(2);
+            document.getElementById('out_park1').innerText = p.toFixed(2); document.getElementById('out_park2').innerText = p.toFixed(2);
+            document.getElementById('out_air1').innerText = a.toFixed(2); document.getElementById('out_air2').innerText = a.toFixed(2);
             document.getElementById('out_okm1').innerText = okm; document.getElementById('out_ckm1').innerText = ckm;
             
             const pt = document.getElementById('in_pTime').value; const dt = document.getElementById('in_dTime').value;
             document.getElementById('out_pTime1').innerText = pt.replace('T',' '); document.getElementById('out_dTime1').innerText = dt.replace('T',' ');
-
             document.querySelectorAll('.out_total').forEach(el => el.innerText = total);
+            
+            document.getElementById('out_invDate').innerText = new Date().toLocaleDateString('en-GB');
         }
 
-        function toggleHistory() { const p = document.getElementById('historyPanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; renderLists(); }
+        function toggleHistory() { const p = document.getElementById('historyPanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; renderDB(); }
 
-        function renderLists() {
-            const hList = document.getElementById('historyList'); hList.innerHTML = db.bills.length ? '' : 'No history.';
-            db.bills.slice(-10).reverse().forEach((b, i) => { hList.innerHTML += `<div class="history-item"><div><b>${b.data.in_cust}</b><br><small>${b.ts}</small></div><button onclick="copyBill(${db.bills.length-1-i})" style="padding:4px; border:none; background:var(--primary); color:white; border-radius:4px; cursor:pointer;">Edit/View</button></div>`; });
+        function renderDB() {
+            const h = document.getElementById('historyList'); h.innerHTML = db.b.length ? '' : 'No bills.';
+            db.b.slice(-15).reverse().forEach((bill, i) => {
+                h.innerHTML += `<div class="history-item"><div><b>${bill.d.in_cust}</b><br><small>${bill.ts}</small></div><div class="h-btns"><button class="h-btn" style="background:#28a745" onclick="downloadOld(${db.b.length-1-i})">Get PDF</button><button class="h-btn" style="background:var(--primary)" onclick="copyBill(${db.b.length-1-i})">Edit</button></div></div>`;
+            });
             const fill = (id, arr) => { const s = document.getElementById(id); s.innerHTML = '<option value="">Select Saved</option>'; arr.forEach((v, idx) => s.innerHTML += `<option value="${idx}">${v.name || v.val}</option>`); };
-            fill('selCust', db.cust); fill('selDriver', db.drv); fill('selVeh', db.veh);
+            fill('selCust', db.c); fill('selDriver', db.d); fill('selVeh', db.v);
         }
 
-        function apply(type, idx) {
-            if(idx === "") return; const d = db[type][idx];
+        function applyData(type, idx) {
+            if(idx === "") return; const d = db[type === 'cust' ? 'c' : type === 'drv' ? 'd' : 'v'][idx];
             if(type==='cust') { document.getElementById('in_cust').value = d.name; document.getElementById('in_mobile').value = d.mobile; document.getElementById('in_pLoc').value = d.addr; }
             if(type==='drv') document.getElementById('in_driver').value = d.val;
             if(type==='veh') { document.getElementById('in_vModel').value = d.model; document.getElementById('in_vNum').value = d.num; }
             update();
         }
 
-        function copyBill(idx) { const b = db.bills[idx].data; for(let k in b) if(document.getElementById(k)) document.getElementById(k).value = b[k]; toggleHistory(); update(); }
+        function copyBill(idx) { const data = db.b[idx].d; for(let k in data) if(document.getElementById(k)) document.getElementById(k).value = data[k]; toggleHistory(); update(); }
+
+        async function downloadOld(idx) { copyBill(idx); setTimeout(() => { downloadPDF(); }, 500); }
 
         function loadMap(e) { if(e.target.files[0]) document.getElementById('mapPreview').src = URL.createObjectURL(e.target.files[0]); }
 
         async function downloadPDF() {
-            const c = document.getElementById('in_cust').value; const m = document.getElementById('in_mobile').value; const d = document.getElementById('in_driver').value; const vn = document.getElementById('in_vNum').value;
-            if(!db.cust.find(x => x.mobile === m)) db.cust.push({name:c, mobile:m, addr: document.getElementById('in_pLoc').value});
-            if(!db.drv.find(x => x.val === d)) db.drv.push({val:d});
-            if(!db.veh.find(x => x.num === vn)) db.veh.push({model:document.getElementById('in_vModel').value, num:vn});
-            const fd = {}; document.querySelectorAll('.controls input').forEach(i => fd[i.id] = i.value);
-            db.bills.push({ts: new Date().toLocaleString(), data: fd});
-            localStorage.setItem('g_c', JSON.stringify(db.cust)); localStorage.setItem('g_d', JSON.stringify(db.drv)); localStorage.setItem('g_v', JSON.stringify(db.veh)); localStorage.setItem('g_b', JSON.stringify(db.bills));
+            const c = document.getElementById('in_cust').value; const m = document.getElementById('in_mobile').value; const dr = document.getElementById('in_driver').value; const vn = document.getElementById('in_vNum').value;
+            if(!db.c.find(x => x.mobile === m)) db.c.push({name:c, mobile:m, addr: document.getElementById('in_pLoc').value});
+            if(!db.d.find(x => x.val === dr)) db.d.push({val:dr});
+            if(!db.v.find(x => x.num === vn)) db.v.push({model:document.getElementById('in_vModel').value, num:vn});
             
+            const fd = {}; document.querySelectorAll('.controls input').forEach(i => fd[i.id] = i.value);
+            db.b.push({ts: new Date().toLocaleString(), d: fd});
+            for(let k in db) localStorage.setItem(STORE[k], JSON.stringify(db[k]));
+
             const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4');
             const c1 = await html2canvas(document.getElementById("page1"), { scale: 2 });
-            pdf.addImage(c1.toDataURL("image/jpeg", 0.7), 'JPEG', 0, 0, 210, 297);
+            pdf.addImage(c1.toDataURL("image/jpeg", 0.75), 'JPEG', 0, 0, 210, 297);
             pdf.addPage();
             const c2 = await html2canvas(document.getElementById("page2"), { scale: 2 });
-            pdf.addImage(c2.toDataURL("image/jpeg", 0.7), 'JPEG', 0, 0, 210, 297);
-            pdf.save(`GTK_Invoice_${c}.pdf`); renderLists();
+            pdf.addImage(c2.toDataURL("image/jpeg", 0.75), 'JPEG', 0, 0, 210, 297);
+            pdf.save(`GTK_${c.replace(/\s/g,'_')}.pdf`); renderDB();
         }
-        renderLists();
+        renderDB();
     </script>
 </body>
 </html>
